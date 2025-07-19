@@ -50,6 +50,16 @@ Hit the Books is a full-stack web application built on a modern React/Next.js ar
 └─────────────────┘                           └─────────────────┘
 ```
 
+## ENV that already exist
+ODDS_API_KEY
+
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+
+SUPABASE_URL=https://aurvdzwvfpirvjdegupc.supabase.co
+SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+
 ---
 
 ## 📁 Ultimate Project Structure
@@ -95,16 +105,11 @@ hit-the-books/
 │   │   ├── opportunities/         # Opportunities tab components
 │   │   │   ├── opportunity-card.tsx    # Individual opportunity
 │   │   │   ├── opportunity-list.tsx    # List of opportunities
-│   │   │   ├── log-bet-modal.tsx       # Bet logging modal
-│   │   │   ├── profit-calculator.tsx   # Real-time calculations
-│   │   │   └── data-freshness.tsx      # Freshness indicators
 │   │   ├── logs/                  # Logs tab components
-│   │   │   ├── bet-log-card.tsx        # Individual log entry
 │   │   │   ├── bet-log-list.tsx        # List of logged bets
-│   │   │   ├── log-filters.tsx         # Filter logged bets
 │   │   │   └── export-logs.tsx         # Export functionality
 │   │   ├── shared/                # Shared dashboard components
-│   │   │   ├── bet-card.tsx            # Reusable bet display
+│   │   │   ├── bet-card.tsx            # Reusable bet display for logs and opps
 │   │   │   └── dashboard-header.tsx    # Header with logo/user
 │   │   └── dashboard-layout.tsx   # Main dashboard container
 │   ├── landing/                   # Landing page components
@@ -147,8 +152,6 @@ hit-the-books/
 │   ├── use-opportunities.ts      # Opportunities data hook
 │   ├── use-bet-logs.ts           # Bet logs hook
 │   ├── use-calculations.ts       # Bet calculations hook
-│   ├── use-local-storage.ts      # Local storage hook
-│   └── use-debounce.ts           # Debouncing hook
 ├── types/                         # TypeScript type definitions
 │   ├── database.ts               # Database types
 │   ├── betting.ts                # Betting-related types

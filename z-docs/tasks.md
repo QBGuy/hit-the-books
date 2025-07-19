@@ -6,6 +6,11 @@
 
 ---
 
+
+
+
+
+
 ## 🚀 Phase 1: Foundation Setup (Priority: Critical)
 
 ### 1.1 Project Infrastructure
@@ -16,15 +21,13 @@
   - Configure ESLint and Prettier
 
 - [ ] **Supabase Configuration**
-  - Create Supabase project
   - Configure Google OAuth in Supabase Auth
-  - Set up environment variables
   - Create development and production instances
 
 - [ ] **Database Schema Creation**
-  - Create `opportunities` table with proper schema
-  - Create `bet_log` table with user relationships
-  - Create `user_actions` table for audit trail
+  - Create `opportunities` table with proper schema (or check exists)
+  - Create `bet_log` table with user relationships (or check exists)
+  - Create `user_actions` table for audit trail (or check exists)
   - Set up Row-Level Security (RLS) policies
   - Create appropriate indexes for performance
 
