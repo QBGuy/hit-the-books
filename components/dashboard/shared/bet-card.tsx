@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Trash2 } from "lucide-react"
 import { formatCurrency, formatPercentage, calculateBetOutcomes } from "@/lib/betting/calculations"
 
 interface BetCardProps {
@@ -18,6 +19,7 @@ interface BetCardProps {
   isExpanded?: boolean
   onClick?: () => void
   onLogBet?: () => void
+  onDeleteBet?: () => void
   profit?: string
   profitPercentage?: number
   showLogButton?: boolean
@@ -46,6 +48,7 @@ export function BetCard({
   isExpanded = false,
   onClick,
   onLogBet,
+  onDeleteBet,
   profit,
   profitPercentage,
   showLogButton = false,
@@ -166,15 +169,29 @@ export function BetCard({
                   <p className="text-xs text-slate-600">Guaranteed Payout</p>
                 </div>
                 <div className="text-center bg-blue-50 rounded-lg p-3 flex items-center justify-center">
-                  <Button 
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onLogBet?.()
-                    }}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700"
-                  >
-                    Log Bet
-                  </Button>
+                  {type === "log" ? (
+                    <Button 
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onDeleteBet?.()
+                      }}
+                      variant="destructive"
+                      className="w-full"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Bet
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onLogBet?.()
+                      }}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700"
+                    >
+                      Log Bet
+                    </Button>
+                  )}
                 </div>
               </div>
             </>

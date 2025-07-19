@@ -96,6 +96,20 @@ export async function logBet(betData: {
   return response.json()
 }
 
+// Delete a bet log
+export async function deleteBetLog(betId: string): Promise<{ message: string }> {
+  const response = await fetch(`/api/bets/${betId}`, {
+    method: 'DELETE',
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json()
+    throw new Error(errorData.message || 'Failed to delete bet')
+  }
+
+  return response.json()
+}
+
 // Hook for managing bet logs
 export function useBetLogs(initialFilters: BetLogFilters = {}) {
   const [betLogs, setBetLogs] = useState<BetLog[]>([])
@@ -135,6 +149,21 @@ export function useBetLogs(initialFilters: BetLogFilters = {}) {
     }
   }, [])
 
+  const removeBetLog = useCallback(async (betId: string) => {
+    try {
+      await deleteBetLog(betId)
+      
+      // Optimistically remove the bet from the list
+      setBetLogs(prev => prev.filter(bet => bet.id !== betId))
+      setTotal(prev => prev - 1)
+      
+      return { success: true }
+    } catch (err) {
+      console.error('Error deleting bet:', err)
+      throw err
+    }
+  }, [])
+
   const updateFilters = useCallback((newFilters: Partial<BetLogFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }))
   }, [])
@@ -152,6 +181,7 @@ export function useBetLogs(initialFilters: BetLogFilters = {}) {
     filters,
     loadBetLogs,
     addBetLog,
+    removeBetLog,
     updateFilters,
     refresh: loadBetLogs
   }

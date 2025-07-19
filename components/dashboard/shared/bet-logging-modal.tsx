@@ -165,7 +165,7 @@ export function BetLoggingModal({
                 </div>
 
                 <div className="text-center bg-emerald-50 rounded-lg p-3">
-                  <p className="text-xl font-bold text-emerald-600">{formatCurrency(opportunity.profit)}</p>
+                  <p className="text-xl font-bold text-emerald-600">{opportunity.calculatedProfitAmount || formatCurrency(opportunity.profit * userStake)}</p>
                   <p className="text-xs text-slate-600">Expected Profit</p>
                 </div>
               </div>

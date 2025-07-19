@@ -54,7 +54,8 @@ export function DashboardLayout() {
     isLoading: betLogsLoading,
     error: betLogsError,
     total: betLogsTotal,
-    refresh: refreshBetLogs
+    refresh: refreshBetLogs,
+    removeBetLog
   } = useBetLogs({
     betType: betType === 'all' ? undefined : betType,
     bookie: selectedBookie === 'all' ? undefined : selectedBookie,
@@ -101,6 +102,11 @@ export function DashboardLayout() {
 
   const handleBetLogged = () => {
     // Refresh bet logs when a new bet is logged
+    refreshBetLogs()
+  }
+
+  const handleBetDeleted = () => {
+    // Refresh bet logs when a bet is deleted
     refreshBetLogs()
   }
 
@@ -192,6 +198,8 @@ export function DashboardLayout() {
                       betLogs={betLogs} 
                       isLoading={betLogsLoading}
                       error={betLogsError}
+                      onDeleteBet={removeBetLog}
+                      onBetDeleted={handleBetDeleted}
                     />
                   </ErrorBoundary>
                 </TabsContent>

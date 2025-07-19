@@ -1,18 +1,38 @@
 "use client"
 
+import { useState } from "react"
 import { BetCard } from "../shared/bet-card"
+import { BetDeleteModal } from "../shared/bet-delete-modal"
 import { BetLog } from "@/hooks/use-bet-logs"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import { formatCurrency } from "@/lib/betting/calculations"
 
 interface BetLogListProps {
   betLogs: BetLog[]
   isLoading?: boolean
   error?: string | null
+  onDeleteBet?: (betId: string) => Promise<void>
+  onBetDeleted?: () => void
 }
 
-export function BetLogList({ betLogs, isLoading, error }: BetLogListProps) {
+export function BetLogList({ betLogs, isLoading, error, onDeleteBet, onBetDeleted }: BetLogListProps) {
+  const [expandedBet, setExpandedBet] = useState<string | null>(null)
+  const [deletingBet, setDeletingBet] = useState<BetLog | null>(null)
+
+  const handleCardClick = (betId: string) => {
+    setExpandedBet(prev => prev === betId ? null : betId)
+  }
+
+  const handleDeleteBet = (bet: BetLog) => {
+    setDeletingBet(bet)
+  }
+
+  const handleDeleteSuccess = () => {
+    setDeletingBet(null)
+    onBetDeleted?.()
+  }
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -47,29 +67,45 @@ export function BetLogList({ betLogs, isLoading, error }: BetLogListProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {betLogs.map((log) => (
-        <BetCard
-          key={log.id}
-          sport={log.sport}
-          team1={log.team_1}
-          team2={log.team_2}
-          bookie1={log.bookie_1}
-          bookie2={log.bookie_2}
-          odds1={log.odds_1}
-          odds2={log.odds_2}
-          stake={log.stake_1}
-          date={new Date(log.timestamp).toLocaleDateString()}
-          status={log.profit_actual !== null ? "Completed" : "Pending"}
-          profit={log.profit_actual !== null ? `$${log.profit_actual.toFixed(2)}` : `$${log.profit.toFixed(2)} (expected)`}
-          type="log"
-          betType={log.bet_type}
-          betfairScalar={log.betfair_scalar}
-          calculatedStake1={log.stake_1}
-          calculatedStake2={log.stake_2}
-          calculatedProfit={log.profit}
+    <>
+      <div className="space-y-4">
+        {betLogs.map((log) => (
+          <BetCard
+            key={log.id}
+            sport={log.sport}
+            team1={log.team_1}
+            team2={log.team_2}
+            bookie1={log.bookie_1}
+            bookie2={log.bookie_2}
+            odds1={log.odds_1}
+            odds2={log.odds_2}
+            stake={log.stake_1}
+            date={new Date(log.timestamp).toLocaleDateString()}
+            status={log.profit_actual !== null ? "Completed" : "Pending"}
+            profit={log.profit_actual !== null ? formatCurrency(log.profit_actual) : formatCurrency(log.profit)}
+            type="log"
+            betType={log.bet_type}
+            betfairScalar={log.betfair_scalar}
+            calculatedStake1={log.stake_1}
+            calculatedStake2={log.stake_2}
+            calculatedProfit={log.profit}
+            isExpanded={expandedBet === log.id}
+            onClick={() => handleCardClick(log.id)}
+            onDeleteBet={() => handleDeleteBet(log)}
+          />
+        ))}
+      </div>
+
+      {/* Bet Delete Modal */}
+      {deletingBet && onDeleteBet && (
+        <BetDeleteModal
+          isOpen={true}
+          onClose={() => setDeletingBet(null)}
+          betLog={deletingBet}
+          onSuccess={handleDeleteSuccess}
+          onDelete={onDeleteBet}
         />
-      ))}
-    </div>
+      )}
+    </>
   )
 } 
