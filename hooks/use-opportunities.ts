@@ -39,8 +39,8 @@ export function useOpportunities({
       const response: OpportunitiesResponse = await fetchOpportunities(betType, bookie)
       
       // Transform the raw database rows to UI-friendly format
-      const transformedOpportunities = response.opportunities.map(row => 
-        transformOpportunityData(row, stake)
+      const transformedOpportunities = response.opportunities.map((row, index) => 
+        transformOpportunityData(row, stake, index)
       )
       
       setOpportunities(transformedOpportunities)
@@ -82,7 +82,7 @@ export function useOpportunities({
   // Update calculated fields when stake changes
   useEffect(() => {
     if (opportunities.length > 0) {
-      const updatedOpportunities = opportunities.map(opp => {
+      const updatedOpportunities = opportunities.map((opp, index) => {
         // Re-transform with new stake
         const dbRow = {
           sport: opp.sport,
@@ -99,7 +99,7 @@ export function useOpportunities({
           bet_type: opp.betType,
           timestamp: opp.timestamp
         }
-        return transformOpportunityData(dbRow, stake)
+        return transformOpportunityData(dbRow, stake, index)
       })
       setOpportunities(updatedOpportunities)
     }

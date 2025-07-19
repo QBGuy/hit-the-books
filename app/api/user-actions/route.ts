@@ -73,8 +73,23 @@ export async function POST(request: Request) {
       )
     }
 
-    // Parse request body
-    const actionData = await request.json()
+    // Parse request body safely
+    let actionData
+    try {
+      const body = await request.text()
+      if (!body.trim()) {
+        return NextResponse.json(
+          { message: 'Request body is required' },
+          { status: 400 }
+        )
+      }
+      actionData = JSON.parse(body)
+    } catch (error) {
+      return NextResponse.json(
+        { message: 'Invalid JSON in request body' },
+        { status: 400 }
+      )
+    }
 
     // Validate required fields
     if (!actionData.action_type) {

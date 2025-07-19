@@ -2,23 +2,35 @@ import { useCallback } from "react"
 
 export function useUserActions() {
   const logDashboardViewed = useCallback(() => {
-    console.log("Dashboard viewed")
     // TODO: Implement actual logging to Supabase
+    // For now, just log to console to prevent API errors
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Dashboard viewed")
+    }
   }, [])
 
   const logFilterChanged = useCallback((filterType: string, value: string) => {
-    console.log(`Filter changed: ${filterType} = ${value}`)
     // TODO: Implement actual logging to Supabase
+    // For now, just log to console to prevent API errors
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Filter changed: ${filterType} = ${value}`)
+    }
   }, [])
 
   const logOpportunitiesRefresh = useCallback((filters: any) => {
-    console.log("Opportunities refreshed with filters:", filters)
     // TODO: Implement actual logging to Supabase
+    // For now, just log to console to prevent API errors
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Opportunities refreshed with filters:", filters)
+    }
   }, [])
 
   const logError = useCallback((error: string, context?: any) => {
-    console.error("Error logged:", error, context)
     // TODO: Implement actual logging to Supabase
+    // For now, just log to console to prevent API errors
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Error logged:", error, context)
+    }
   }, [])
 
   return {

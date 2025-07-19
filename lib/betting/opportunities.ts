@@ -29,10 +29,22 @@ export interface Opportunity {
   calculatedProfitAmount?: string
 }
 
+// Simple hash function for generating consistent unique IDs
+function simpleHash(str: string): string {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32-bit integer
+  }
+  return Math.abs(hash).toString(36)
+}
+
 // Transform database row to UI-friendly opportunity
 export function transformOpportunityData(
   row: OpportunityRow, 
-  userStake: number = 100
+  userStake: number = 100,
+  index: number = 0
 ): Opportunity {
   const isBonus = row.bet_type === 'bonus'
   
@@ -48,8 +60,13 @@ export function transformOpportunityData(
     bookie2: row.bookie_2
   })
 
+  // Create a unique ID by including all distinguishing fields
+  // Add index and hash to handle any potential duplicates
+  const dataString = `${row.sport}-${row.team_1}-${row.team_2}-${row.bookie_1}-${row.bookie_2}-${row.odds_1.toFixed(3)}-${row.odds_2.toFixed(3)}-${row.profit.toFixed(6)}-${row.bet_type}-${row.timestamp}`
+  const uniqueId = `${simpleHash(dataString)}-${index}`
+
   return {
-    id: `${row.sport}-${row.team_1}-${row.team_2}-${row.bookie_1}-${row.timestamp}`,
+    id: uniqueId,
     sport: row.sport,
     team1: row.team_1,
     team2: row.team_2,
