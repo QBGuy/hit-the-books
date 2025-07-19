@@ -58,7 +58,7 @@ export function BetCard({
   calculatedTotalPayout,
   calculatedProfit,
   betfairScalar = 1,
-  betType = "turnover"
+  betType = "bonus"
 }: BetCardProps) {
   
   // Use proper calculations if we have the required data, otherwise fallback to simple calculation

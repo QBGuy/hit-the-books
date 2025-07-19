@@ -1,43 +1,97 @@
 import { useCallback } from "react"
 
+// Log user action to Supabase
+async function logUserAction(actionType: string, actionDetails?: any): Promise<void> {
+  try {
+    const response = await fetch('/api/user-actions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action_type: actionType,
+        action_details: actionDetails
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      console.warn('Failed to log user action:', errorData.message)
+    }
+  } catch (error) {
+    console.warn('Error logging user action:', error)
+  }
+}
+
 export function useUserActions() {
   const logDashboardViewed = useCallback(() => {
-    // TODO: Implement actual logging to Supabase
-    // For now, just log to console to prevent API errors
-    if (process.env.NODE_ENV === 'development') {
-      console.log("Dashboard viewed")
-    }
+    logUserAction('dashboard_viewed', {
+      timestamp: new Date().toISOString()
+    })
   }, [])
 
   const logFilterChanged = useCallback((filterType: string, value: string) => {
-    // TODO: Implement actual logging to Supabase
-    // For now, just log to console to prevent API errors
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`Filter changed: ${filterType} = ${value}`)
-    }
+    logUserAction('filter_changed', {
+      filter_type: filterType,
+      value,
+      timestamp: new Date().toISOString()
+    })
   }, [])
 
   const logOpportunitiesRefresh = useCallback((filters: any) => {
-    // TODO: Implement actual logging to Supabase
-    // For now, just log to console to prevent API errors
-    if (process.env.NODE_ENV === 'development') {
-      console.log("Opportunities refreshed with filters:", filters)
-    }
+    logUserAction('opportunities_refresh', {
+      filters,
+      timestamp: new Date().toISOString()
+    })
+  }, [])
+
+  const logBetLogged = useCallback((betData: any) => {
+    logUserAction('bet_logged', {
+      sport: betData.sport,
+      bet_type: betData.bet_type,
+      profit: betData.profit,
+      bookie_1: betData.bookie_1,
+      bookie_2: betData.bookie_2,
+      timestamp: new Date().toISOString()
+    })
   }, [])
 
   const logError = useCallback((error: string, context?: any) => {
-    // TODO: Implement actual logging to Supabase
-    // For now, just log to console to prevent API errors
-    if (process.env.NODE_ENV === 'development') {
-      console.error("Error logged:", error, context)
-    }
+    logUserAction('error_occurred', {
+      error,
+      context,
+      timestamp: new Date().toISOString()
+    })
+  }, [])
+
+  const logPageView = useCallback((page: string) => {
+    logUserAction('page_viewed', {
+      page,
+      timestamp: new Date().toISOString()
+    })
+  }, [])
+
+  const logLogin = useCallback(() => {
+    logUserAction('user_login', {
+      timestamp: new Date().toISOString()
+    })
+  }, [])
+
+  const logLogout = useCallback(() => {
+    logUserAction('user_logout', {
+      timestamp: new Date().toISOString()
+    })
   }, [])
 
   return {
     logDashboardViewed,
     logFilterChanged,
     logOpportunitiesRefresh,
-    logError
+    logBetLogged,
+    logError,
+    logPageView,
+    logLogin,
+    logLogout
   }
 }
 

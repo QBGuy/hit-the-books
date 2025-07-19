@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { CheckCircle } from "lucide-react"
 import { formatCurrency } from "@/lib/betting/calculations"
+import { logBet } from "@/hooks/use-bet-logs"
+import { useUserActions } from "@/hooks/use-user-actions"
 
 interface BetLoggingModalProps {
   isOpen: boolean
@@ -43,6 +45,9 @@ export function BetLoggingModal({
 }: BetLoggingModalProps) {
   const [isLogging, setIsLogging] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const { logBetLogged } = useUserActions()
 
   // Use calculated stakes if available, otherwise fallback to userStake
   const stake1Display = calculatedStake1 !== undefined ? calculatedStake1 : userStake
@@ -50,24 +55,33 @@ export function BetLoggingModal({
 
   const handleLogBet = async () => {
     setIsLogging(true)
+    setError(null)
     
     try {
-      // Simulate API call to log the bet
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      console.log("Logging bet:", {
+      // Prepare bet data for API
+      const betData = {
         sport: opportunity.sport,
-        team1: opportunity.team1,
-        team2: opportunity.team2,
-        bookie1: opportunity.bookie1,
-        bookie2: opportunity.bookie2,
-        odds1: opportunity.odds1,
-        odds2: opportunity.odds2,
-        stake1: stake1Display,
-        stake2: stake2Display,
+        bookie_1: opportunity.bookie1,
+        odds_1: opportunity.odds1,
+        team_1: opportunity.team1,
+        stake_1: stake1Display,
+        bookie_2: opportunity.bookie2,
+        odds_2: opportunity.odds2,
+        team_2: opportunity.team2,
+        stake_2: stake2Display,
         profit: opportunity.profit,
-        betType: opportunity.betType
-      })
+        betfair_scalar: opportunity.betfairScalar,
+        bookie: opportunity.bookie,
+        bet_type: opportunity.betType
+      }
+
+      // Log the bet to Supabase
+      const result = await logBet(betData)
+      
+      // Log user action
+      logBetLogged(betData)
+      
+      console.log("Bet logged successfully:", result)
       
       setIsSuccess(true)
       
@@ -80,6 +94,7 @@ export function BetLoggingModal({
       
     } catch (error) {
       console.error("Failed to log bet:", error)
+      setError(error instanceof Error ? error.message : "Failed to log bet")
     } finally {
       setIsLogging(false)
     }
@@ -110,6 +125,13 @@ export function BetLoggingModal({
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Error Display */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          )}
+
           {/* Bet Summary */}
           <Card>
             <CardContent className="p-4">

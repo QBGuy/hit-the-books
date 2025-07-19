@@ -1,22 +1,37 @@
 "use client"
 
 import { BetCard } from "../shared/bet-card"
-
-interface BetLog {
-  id: number
-  date: string
-  sport: string
-  teams: string
-  stake: string
-  profit: string
-  status: string
-}
+import { BetLog } from "@/hooks/use-bet-logs"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 
 interface BetLogListProps {
   betLogs: BetLog[]
+  isLoading?: boolean
+  error?: string | null
 }
 
-export function BetLogList({ betLogs }: BetLogListProps) {
+export function BetLogList({ betLogs, isLoading, error }: BetLogListProps) {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Failed to load bet logs: {error}
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
   if (betLogs.length === 0) {
     return (
       <div className="text-center py-12">
@@ -37,17 +52,22 @@ export function BetLogList({ betLogs }: BetLogListProps) {
         <BetCard
           key={log.id}
           sport={log.sport}
-          team1={log.teams.split(" vs ")[0]}
-          team2={log.teams.split(" vs ")[1]}
-          bookie1="Sportsbet" // These would come from actual log data
-          bookie2="Betfair"
-          odds1={parseFloat("2.1")} // These would come from actual log data
-          odds2={parseFloat("2.05")}
-          stake={parseFloat(log.stake.replace('$', ''))}
-          date={log.date}
-          status={log.status}
-          profit={log.profit}
+          team1={log.team_1}
+          team2={log.team_2}
+          bookie1={log.bookie_1}
+          bookie2={log.bookie_2}
+          odds1={log.odds_1}
+          odds2={log.odds_2}
+          stake={log.stake_1}
+          date={new Date(log.timestamp).toLocaleDateString()}
+          status={log.profit_actual !== null ? "Completed" : "Pending"}
+          profit={log.profit_actual !== null ? `$${log.profit_actual.toFixed(2)}` : `$${log.profit.toFixed(2)} (expected)`}
           type="log"
+          betType={log.bet_type}
+          betfairScalar={log.betfair_scalar}
+          calculatedStake1={log.stake_1}
+          calculatedStake2={log.stake_2}
+          calculatedProfit={log.profit}
         />
       ))}
     </div>

@@ -4,17 +4,21 @@ import { useState } from "react"
 import { BetCard } from "../shared/bet-card"
 import { BetLoggingModal } from "../shared/bet-logging-modal"
 import { Opportunity } from "@/lib/betting/opportunities"
+import { Button } from "@/components/ui/button"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface OpportunityListProps {
   opportunities: Opportunity[]
   stake: number
   betType: string
-  onRefresh?: () => void
+  onBetLogged?: () => void
 }
 
-export function OpportunityList({ opportunities, stake, betType, onRefresh }: OpportunityListProps) {
+export function OpportunityList({ opportunities, stake, betType, onBetLogged }: OpportunityListProps) {
   const [expandedOpportunity, setExpandedOpportunity] = useState<string | null>(null)
   const [loggingOpportunity, setLoggingOpportunity] = useState<Opportunity | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5
 
   const handleCardClick = (opportunityId: string) => {
     setExpandedOpportunity(prev => prev === opportunityId ? null : opportunityId)
@@ -26,7 +30,21 @@ export function OpportunityList({ opportunities, stake, betType, onRefresh }: Op
 
   const handleModalSuccess = () => {
     setLoggingOpportunity(null)
-    onRefresh?.() // Refresh data after successful bet logging
+    onBetLogged?.()
+  }
+
+  // Calculate pagination
+  const totalPages = Math.ceil(opportunities.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentOpportunities = opportunities.slice(startIndex, endIndex)
+
+  const handlePreviousPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1))
+  }
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages))
   }
 
   if (opportunities.length === 0) {
@@ -38,7 +56,7 @@ export function OpportunityList({ opportunities, stake, betType, onRefresh }: Op
           </svg>
         </div>
         <h3 className="text-lg font-semibold text-slate-900 mb-2">No Opportunities Available</h3>
-        <p className="text-slate-600">Click refresh to fetch the latest betting opportunities</p>
+        <p className="text-slate-600">Use the refresh button in the controls panel to fetch the latest betting opportunities</p>
       </div>
     )
   }
@@ -46,7 +64,7 @@ export function OpportunityList({ opportunities, stake, betType, onRefresh }: Op
   return (
     <>
       <div className="space-y-4">
-        {opportunities.map((opportunity) => (
+        {currentOpportunities.map((opportunity) => (
           <BetCard
             key={opportunity.id}
             sport={opportunity.sport}
@@ -76,24 +94,41 @@ export function OpportunityList({ opportunities, stake, betType, onRefresh }: Op
         ))}
       </div>
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center space-x-2 mt-6">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </Button>
+          
+          <span className="text-sm text-slate-600">
+            Page {currentPage} of {totalPages}
+          </span>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {/* Bet Logging Modal */}
       {loggingOpportunity && (
         <BetLoggingModal
-          isOpen={!!loggingOpportunity}
+          isOpen={true}
           onClose={() => setLoggingOpportunity(null)}
-          opportunity={{
-            sport: loggingOpportunity.sport,
-            team1: loggingOpportunity.team1,
-            team2: loggingOpportunity.team2,
-            bookie1: loggingOpportunity.bookie1,
-            bookie2: loggingOpportunity.bookie2,
-            odds1: loggingOpportunity.odds1,
-            odds2: loggingOpportunity.odds2,
-            stake2: loggingOpportunity.calculatedStake2 || loggingOpportunity.stake2,
-            profit: loggingOpportunity.calculatedProfit || loggingOpportunity.profit,
-            betfairScalar: loggingOpportunity.betfairScalar,
-            betType: loggingOpportunity.betType,
-            bookie: loggingOpportunity.bookie
-          }}
+          opportunity={loggingOpportunity}
           userStake={stake}
           calculatedStake1={loggingOpportunity.calculatedStake1}
           calculatedStake2={loggingOpportunity.calculatedStake2}

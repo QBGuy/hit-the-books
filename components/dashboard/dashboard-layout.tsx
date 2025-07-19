@@ -10,44 +10,14 @@ import { OpportunityList } from "./opportunities/opportunity-list"
 import { BetLogList } from "./logs/bet-log-list"
 import { DataFreshnessIndicator } from "./shared/data-freshness-indicator"
 import { useOpportunities } from "@/hooks/use-opportunities"
+import { useBetLogs } from "@/hooks/use-bet-logs"
 import { ErrorBoundary, ErrorFallback } from "@/components/ui/error-boundary"
 import { LoadingSpinner, CardLoadingSkeleton } from "@/components/ui/loading-spinner"
 import { useUserActions } from "@/hooks/use-user-actions"
 
-// Mock bet logs data - replace with real data later
-const mockBetLogs = [
-  {
-    id: 1,
-    date: "2024-01-15",
-    sport: "NFL",
-    teams: "Broncos vs Cowboys",
-    stake: "$200",
-    profit: "$9.52",
-    status: "Won",
-  },
-  {
-    id: 2,
-    date: "2024-01-14",
-    sport: "AFL",
-    teams: "Richmond vs Collingwood",
-    stake: "$150",
-    profit: "$10.20",
-    status: "Won",
-  },
-  {
-    id: 3,
-    date: "2024-01-13",
-    sport: "NBA",
-    teams: "Lakers vs Warriors",
-    stake: "$100",
-    profit: "$3.60",
-    status: "Won",
-  },
-]
-
 export function DashboardLayout() {
   const [stake, setStake] = useState("100")
-  const [betType, setBetType] = useState("turnover")
+  const [betType, setBetType] = useState("bonus")
   const [selectedBookie, setSelectedBookie] = useState("all")
   
   // User action tracking
@@ -78,6 +48,19 @@ export function DashboardLayout() {
     refreshInterval: 60000
   })
 
+  // Use the bet logs hook
+  const {
+    betLogs,
+    isLoading: betLogsLoading,
+    error: betLogsError,
+    total: betLogsTotal,
+    refresh: refreshBetLogs
+  } = useBetLogs({
+    betType: betType === 'all' ? undefined : betType,
+    bookie: selectedBookie === 'all' ? undefined : selectedBookie,
+    limit: 50
+  })
+
   // Log dashboard view on mount
   useEffect(() => {
     logDashboardViewed()
@@ -102,20 +85,32 @@ export function DashboardLayout() {
     }
   }, [error, logError, betType, selectedBookie, stake])
 
+  useEffect(() => {
+    if (betLogsError) {
+      logError(betLogsError, { 
+        context: 'dashboard_bet_logs',
+        filters: { betType, selectedBookie }
+      })
+    }
+  }, [betLogsError, logError, betType, selectedBookie])
+
   const handleRefresh = () => {
     logOpportunitiesRefresh({ betType, selectedBookie, stake })
     refresh()
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col">
-      {/* Header Bar */}
-      <DashboardHeader />
+  const handleBetLogged = () => {
+    // Refresh bet logs when a new bet is logged
+    refreshBetLogs()
+  }
 
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <div className="w-80 bg-white border-r border-slate-200 shadow-lg flex flex-col">
-          {/* Betting Controls */}
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <DashboardHeader />
+      
+      <div className="flex">
+        {/* Controls Panel */}
+        <div className="w-80 bg-white border-r border-slate-200">
           <ControlsPanel
             stake={stake}
             setStake={setStake}
@@ -125,68 +120,34 @@ export function DashboardLayout() {
             setSelectedBookie={setSelectedBookie}
             onRefresh={handleRefresh}
           />
-
-          {/* User Section */}
-          <UserSection />
         </div>
 
         {/* Main Content */}
         <div className="flex-1 p-6">
-          {/* Opportunities with Tabs */}
-          <Card className="shadow-lg border-slate-200">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center space-x-2">
-                  <Zap className="h-5 w-5 text-emerald-600" />
-                  <span>{betType === "bonus" ? "Bonus Conversion Opportunities" : "Turnover Opportunities"}</span>
-                </CardTitle>
-              </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Zap className="h-5 w-5 text-emerald-600" />
+                <span>Hit the Books Dashboard</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="opportunities" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6 bg-slate-100">
-                  <TabsTrigger
-                    value="opportunities"
-                    className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
-                  >
-                    Opportunities
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="log"
-                    className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
-                  >
-                    Log
-                  </TabsTrigger>
+              <Tabs defaultValue="opportunities" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+                  <TabsTrigger value="log">Bet Logs ({betLogsTotal})</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="opportunities">
                   <div className="space-y-4">
-                    <ErrorBoundary
-                      fallback={
-                        <ErrorFallback 
-                          title="Data Freshness Error"
-                          message="Unable to load data freshness information"
-                        />
-                      }
-                    >
-                      <DataFreshnessIndicator
-                        lastUpdated={lastUpdated}
-                        ageInSeconds={ageInSeconds}
-                        isStale={isStale}
-                        isFresh={isFresh}
-                        needsRefresh={needsRefresh}
-                        onRefresh={handleRefresh}
-                        isRefreshing={isRefreshing}
-                      />
-                    </ErrorBoundary>
-                    
-                    {error && (
-                      <ErrorFallback 
-                        title="Failed to load opportunities"
-                        message={error}
-                        resetError={handleRefresh}
-                      />
-                    )}
+                    <DataFreshnessIndicator
+                      lastUpdated={lastUpdated}
+                      ageInSeconds={ageInSeconds}
+                      isStale={isStale}
+                      isFresh={isFresh}
+                      needsRefresh={needsRefresh}
+                      isRefreshing={isRefreshing}
+                    />
                     
                     {isLoading ? (
                       <div className="space-y-4">
@@ -211,7 +172,7 @@ export function DashboardLayout() {
                           opportunities={opportunities}
                           stake={parseFloat(stake) || 100}
                           betType={betType}
-                          onRefresh={handleRefresh}
+                          onBetLogged={handleBetLogged}
                         />
                       </ErrorBoundary>
                     )}
@@ -227,7 +188,11 @@ export function DashboardLayout() {
                       />
                     }
                   >
-                    <BetLogList betLogs={mockBetLogs} />
+                    <BetLogList 
+                      betLogs={betLogs} 
+                      isLoading={betLogsLoading}
+                      error={betLogsError}
+                    />
                   </ErrorBoundary>
                 </TabsContent>
               </Tabs>
