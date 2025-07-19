@@ -14,49 +14,7 @@ import { ErrorBoundary, ErrorFallback } from "@/components/ui/error-boundary"
 import { LoadingSpinner, CardLoadingSkeleton } from "@/components/ui/loading-spinner"
 import { useUserActions } from "@/hooks/use-user-actions"
 
-// Mock data - replace with real data later
-const mockOpportunities = [
-  {
-    id: 1,
-    sport: "NFL",
-    type: "Turnover",
-    team1: "Broncos",
-    team2: "Cowboys",
-    bookie1: "Sportsbet",
-    bookie2: "Betfair",
-    odds1: "2.1",
-    odds2: "2.05",
-    profit: "4.8%",
-    profitAmount: "$4.76",
-  },
-  {
-    id: 2,
-    sport: "AFL",
-    type: "Bonus Bet",
-    team1: "Richmond",
-    team2: "Collingwood",
-    bookie1: "TAB",
-    bookie2: "Ladbrokes",
-    odds1: "1.85",
-    odds2: "2.2",
-    profit: "6.8%",
-    profitAmount: "$6.80",
-  },
-  {
-    id: 3,
-    sport: "NBA",
-    type: "Turnover",
-    team1: "Lakers",
-    team2: "Warriors",
-    bookie1: "PointsBet",
-    bookie2: "Betfair",
-    odds1: "1.95",
-    odds2: "2.1",
-    profit: "3.6%",
-    profitAmount: "$3.60",
-  },
-]
-
+// Mock bet logs data - replace with real data later
 const mockBetLogs = [
   {
     id: 1,
@@ -115,6 +73,7 @@ export function DashboardLayout() {
   } = useOpportunities({
     betType,
     bookie: selectedBookie,
+    stake: parseFloat(stake) || 100, // Convert to number
     autoRefresh: true,
     refreshInterval: 60000
   })
@@ -174,7 +133,7 @@ export function DashboardLayout() {
         {/* Main Content */}
         <div className="flex-1 p-6">
           {/* Opportunities with Tabs */}
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <Card className="shadow-lg border-slate-200">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center space-x-2">
@@ -250,7 +209,7 @@ export function DashboardLayout() {
                       >
                         <OpportunityList
                           opportunities={opportunities}
-                          stake={stake}
+                          stake={parseFloat(stake) || 100}
                           betType={betType}
                           onRefresh={handleRefresh}
                         />

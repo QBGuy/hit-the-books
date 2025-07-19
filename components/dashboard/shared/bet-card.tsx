@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { formatCurrency, formatPercentage } from "@/lib/betting/calculations"
 
 interface BetCardProps {
   sport: string
@@ -11,13 +12,14 @@ interface BetCardProps {
   team2: string
   bookie1: string
   bookie2: string
-  odds1: string
-  odds2: string
-  stake: string
+  odds1: number
+  odds2: number
+  stake: number
   isExpanded?: boolean
   onClick?: () => void
   onLogBet?: () => void
   profit?: string
+  profitPercentage?: number
   showLogButton?: boolean
   date?: string
   status?: string
@@ -37,19 +39,23 @@ export function BetCard({
   onClick,
   onLogBet,
   profit,
+  profitPercentage,
   showLogButton = false,
   date,
   status,
   type = "opportunity"
 }: BetCardProps) {
   const calculateProfit = () => {
-    const stakeAmount = Number.parseFloat(stake)
-    const odds1Num = Number.parseFloat(odds1)
-    const odds2Num = Number.parseFloat(odds2)
-    return (stakeAmount * odds1Num + stakeAmount * odds2Num - stakeAmount * 2).toFixed(2)
+    const stakeAmount = stake
+    const payout1 = stakeAmount * odds1
+    const payout2 = stakeAmount * odds2
+    const totalOutlay = stakeAmount * 2
+    const totalPayout = Math.min(payout1, payout2)
+    return (totalPayout - totalOutlay).toFixed(2)
   }
 
-  const calculatedProfit = profit || calculateProfit()
+  const calculatedProfit = profit || formatCurrency(Number(calculateProfit()))
+  const displayProfitPercentage = profitPercentage ? formatPercentage(profitPercentage) : null
 
   return (
     <Card
@@ -72,8 +78,8 @@ export function BetCard({
             <div className="text-center">
               <p className="font-semibold text-lg text-slate-900">{team1}</p>
               <p className="text-sm text-slate-500">{bookie1}</p>
-              <p className="text-xl font-bold text-emerald-600">{odds1}</p>
-              <p className="text-lg font-bold text-slate-900 mt-1">${stake}</p>
+              <p className="text-xl font-bold text-emerald-600">{odds1.toFixed(2)}</p>
+              <p className="text-lg font-bold text-slate-900 mt-1">{formatCurrency(stake)}</p>
             </div>
 
             <div className="text-center">
@@ -83,13 +89,15 @@ export function BetCard({
             <div className="text-center">
               <p className="font-semibold text-lg text-slate-900">{team2}</p>
               <p className="text-sm text-slate-500">{bookie2}</p>
-              <p className="text-xl font-bold text-emerald-600">{odds2}</p>
-              <p className="text-lg font-bold text-slate-900 mt-1">${stake}</p>
+              <p className="text-xl font-bold text-emerald-600">{odds2.toFixed(2)}</p>
+              <p className="text-lg font-bold text-slate-900 mt-1">{formatCurrency(stake)}</p>
             </div>
 
             <div className="text-center bg-emerald-50 rounded-lg p-3">
-              <p className="text-xl font-bold text-emerald-600">${calculatedProfit}</p>
-              <p className="text-xs text-slate-600">Profit</p>
+              <p className="text-xl font-bold text-emerald-600">{calculatedProfit}</p>
+              <p className="text-xs text-slate-600">
+                Profit {displayProfitPercentage && `(${displayProfitPercentage})`}
+              </p>
               {status && <Badge variant={status === "Won" ? "default" : "secondary"} className="mt-1 text-xs">{status}</Badge>}
             </div>
           </div>
@@ -101,19 +109,15 @@ export function BetCard({
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center bg-slate-50 rounded-lg p-3">
                   <p className="text-lg font-bold text-slate-900">
-                    ${(Number.parseFloat(stake) * 2).toFixed(2)}
+                    {formatCurrency(stake * 2)}
                   </p>
                   <p className="text-xs text-slate-600">Outlay</p>
                 </div>
                 <div className="text-center bg-emerald-50 rounded-lg p-3">
                   <p className="text-lg font-bold text-emerald-600">
-                    $
-                    {(
-                      Number.parseFloat(stake) * Number.parseFloat(odds1) +
-                      Number.parseFloat(stake) * Number.parseFloat(odds2)
-                    ).toFixed(2)}
+                    {formatCurrency(Math.min(stake * odds1, stake * odds2))}
                   </p>
-                  <p className="text-xs text-slate-600">Payout</p>
+                  <p className="text-xs text-slate-600">Guaranteed Payout</p>
                 </div>
                 <div className="text-center bg-blue-50 rounded-lg p-3 flex items-center justify-center">
                   <Button 

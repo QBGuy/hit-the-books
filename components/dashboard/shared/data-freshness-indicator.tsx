@@ -1,18 +1,17 @@
 "use client"
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { RefreshCw, Clock, AlertTriangle, CheckCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Loader2, RefreshCw, Clock, CheckCircle, AlertCircle } from "lucide-react"
 
 interface DataFreshnessIndicatorProps {
-  lastUpdated: Date
+  lastUpdated: Date | null
   ageInSeconds: number
   isStale: boolean
   isFresh: boolean
   needsRefresh: boolean
-  onRefresh: () => void
   isRefreshing: boolean
+  onRefresh: () => void
 }
 
 export function DataFreshnessIndicator({
@@ -21,83 +20,66 @@ export function DataFreshnessIndicator({
   isStale,
   isFresh,
   needsRefresh,
-  onRefresh,
-  isRefreshing
+  isRefreshing,
+  onRefresh
 }: DataFreshnessIndicatorProps) {
-  const formatAge = (seconds: number) => {
+  const formatAge = (seconds: number): string => {
     if (seconds < 60) return `${seconds}s ago`
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
     return `${Math.floor(seconds / 3600)}h ago`
   }
 
-  const getStatusBadge = () => {
-    if (isRefreshing) {
-      return (
-        <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-          <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-          Refreshing...
-        </Badge>
-      )
-    }
-    
-    if (isFresh) {
-      return (
-        <Badge variant="default" className="bg-emerald-100 text-emerald-700">
-          <CheckCircle className="h-3 w-3 mr-1" />
-          Fresh
-        </Badge>
-      )
-    }
-    
-    if (needsRefresh) {
-      return (
-        <Badge variant="destructive" className="bg-orange-100 text-orange-700">
-          <AlertTriangle className="h-3 w-3 mr-1" />
-          Needs Refresh
-        </Badge>
-      )
-    }
-    
-    if (isStale) {
-      return (
-        <Badge variant="destructive">
-          <AlertTriangle className="h-3 w-3 mr-1" />
-          Stale
-        </Badge>
-      )
-    }
-    
-    return (
-      <Badge variant="secondary">
-        <Clock className="h-3 w-3 mr-1" />
-        Good
-      </Badge>
-    )
+  const getFreshnessColor = () => {
+    if (isRefreshing) return "secondary"
+    if (isFresh) return "default"
+    if (needsRefresh) return "destructive"
+    if (isStale) return "destructive"
+    return "secondary"
+  }
+
+  const getFreshnessIcon = () => {
+    if (isRefreshing) return <Loader2 className="h-3 w-3 animate-spin" />
+    if (isFresh) return <CheckCircle className="h-3 w-3" />
+    if (needsRefresh || isStale) return <AlertCircle className="h-3 w-3" />
+    return <Clock className="h-3 w-3" />
+  }
+
+  const getFreshnessText = () => {
+    if (isRefreshing) return "Refreshing..."
+    if (!lastUpdated) return "No data"
+    if (isFresh) return `Fresh (${formatAge(ageInSeconds)})`
+    if (needsRefresh) return `Needs refresh (${formatAge(ageInSeconds)})`
+    if (isStale) return `Stale (${formatAge(ageInSeconds)})`
+    return formatAge(ageInSeconds)
   }
 
   return (
-    <Card className="border-slate-200 bg-slate-50">
-      <CardContent className="p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            {getStatusBadge()}
-            <span className="text-sm text-slate-600">
-              Last updated: {formatAge(ageInSeconds)}
-            </span>
-          </div>
-          
-          <Button
-            onClick={onRefresh}
-            disabled={isRefreshing}
-            size="sm"
-            variant="outline"
-            className="h-8"
-          >
-            <RefreshCw className={`h-3 w-3 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Refreshing...' : 'Refresh'}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex items-center gap-3">
+      <Badge variant={getFreshnessColor()} className="text-xs">
+        {getFreshnessIcon()}
+        <span className="ml-1">{getFreshnessText()}</span>
+      </Badge>
+      
+      <Button
+        onClick={onRefresh}
+        disabled={isRefreshing}
+        size="sm"
+        variant="outline"
+        className="text-xs"
+      >
+        {isRefreshing ? (
+          <Loader2 className="h-3 w-3 animate-spin mr-1" />
+        ) : (
+          <RefreshCw className="h-3 w-3 mr-1" />
+        )}
+        Refresh
+      </Button>
+      
+      {lastUpdated && (
+        <span className="text-xs text-slate-500">
+          Last updated: {lastUpdated.toLocaleTimeString()}
+        </span>
+      )}
+    </div>
   )
 } 

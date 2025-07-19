@@ -3,36 +3,20 @@
 import { useState } from "react"
 import { BetCard } from "../shared/bet-card"
 import { BetLoggingModal } from "../shared/bet-logging-modal"
-
-interface Opportunity {
-  id: number
-  sport: string
-  type: string
-  team1: string
-  team2: string
-  bookie1: string
-  bookie2: string
-  odds1: string
-  odds2: string
-  profit: string
-  profitAmount: string
-  stake2?: number
-  betfairScalar?: number
-  bookie?: string
-}
+import { Opportunity } from "@/lib/betting/opportunities"
 
 interface OpportunityListProps {
   opportunities: Opportunity[]
-  stake: string
+  stake: number
   betType: string
   onRefresh?: () => void
 }
 
 export function OpportunityList({ opportunities, stake, betType, onRefresh }: OpportunityListProps) {
-  const [expandedOpportunity, setExpandedOpportunity] = useState<number | null>(null)
+  const [expandedOpportunity, setExpandedOpportunity] = useState<string | null>(null)
   const [loggingOpportunity, setLoggingOpportunity] = useState<Opportunity | null>(null)
 
-  const handleCardClick = (opportunityId: number) => {
+  const handleCardClick = (opportunityId: string) => {
     setExpandedOpportunity(prev => prev === opportunityId ? null : opportunityId)
   }
 
@@ -73,6 +57,8 @@ export function OpportunityList({ opportunities, stake, betType, onRefresh }: Op
             odds1={opportunity.odds1}
             odds2={opportunity.odds2}
             stake={stake}
+            profit={opportunity.calculatedProfitAmount}
+            profitPercentage={opportunity.profitPercentage}
             isExpanded={expandedOpportunity === opportunity.id}
             onClick={() => handleCardClick(opportunity.id)}
             onLogBet={() => handleLogBet(opportunity)}
@@ -92,15 +78,15 @@ export function OpportunityList({ opportunities, stake, betType, onRefresh }: Op
             team2: loggingOpportunity.team2,
             bookie1: loggingOpportunity.bookie1,
             bookie2: loggingOpportunity.bookie2,
-            odds1: parseFloat(loggingOpportunity.odds1),
-            odds2: parseFloat(loggingOpportunity.odds2),
-            stake2: loggingOpportunity.stake2 || parseFloat(stake),
-            profit: parseFloat(loggingOpportunity.profit || "0"),
-            betfairScalar: loggingOpportunity.betfairScalar || 1,
-            betType: (betType === "bonus" ? "bonus" : "turnover") as "bonus" | "turnover",
-            bookie: loggingOpportunity.bookie || loggingOpportunity.bookie1
+            odds1: loggingOpportunity.odds1,
+            odds2: loggingOpportunity.odds2,
+            stake2: loggingOpportunity.calculatedStake2 || loggingOpportunity.stake2,
+            profit: loggingOpportunity.calculatedProfit || loggingOpportunity.profit,
+            betfairScalar: loggingOpportunity.betfairScalar,
+            betType: loggingOpportunity.betType,
+            bookie: loggingOpportunity.bookie
           }}
-          userStake={parseFloat(stake)}
+          userStake={stake}
           onSuccess={handleModalSuccess}
         />
       )}

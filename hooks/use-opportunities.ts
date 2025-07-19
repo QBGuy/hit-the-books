@@ -1,22 +1,16 @@
-import { useState, useEffect } from "react"
-
-interface Opportunity {
-  id: number
-  sport: string
-  type: string
-  team1: string
-  team2: string
-  bookie1: string
-  bookie2: string
-  odds1: string
-  odds2: string
-  profit: string
-  profitAmount: string
-}
+import { useState, useEffect, useCallback } from "react"
+import { 
+  Opportunity, 
+  OpportunitiesResponse, 
+  fetchOpportunities, 
+  refreshOpportunities, 
+  transformOpportunityData 
+} from "@/lib/betting/opportunities"
 
 interface UseOpportunitiesProps {
   betType: string
   bookie: string
+  stake: number
   autoRefresh?: boolean
   refreshInterval?: number
 }
@@ -24,97 +18,99 @@ interface UseOpportunitiesProps {
 export function useOpportunities({
   betType,
   bookie,
+  stake,
   autoRefresh = false,
   refreshInterval = 60000
 }: UseOpportunitiesProps) {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [ageInSeconds, setAgeInSeconds] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [needsRefresh, setNeedsRefresh] = useState(false)
+  const [isStale, setIsStale] = useState(false)
+  const [isFresh, setIsFresh] = useState(false)
 
-  // Mock data
-  const mockOpportunities: Opportunity[] = [
-    {
-      id: 1,
-      sport: "NFL",
-      type: "Turnover",
-      team1: "Broncos",
-      team2: "Cowboys",
-      bookie1: "Sportsbet",
-      bookie2: "Betfair",
-      odds1: "2.1",
-      odds2: "2.05",
-      profit: "4.8%",
-      profitAmount: "$4.76",
-    },
-    {
-      id: 2,
-      sport: "AFL",
-      type: "Bonus Bet",
-      team1: "Richmond",
-      team2: "Collingwood",
-      bookie1: "TAB",
-      bookie2: "Ladbrokes",
-      odds1: "1.85",
-      odds2: "2.2",
-      profit: "6.8%",
-      profitAmount: "$6.80",
-    },
-    {
-      id: 3,
-      sport: "NBA",
-      type: "Turnover",
-      team1: "Lakers",
-      team2: "Warriors",
-      bookie1: "PointsBet",
-      bookie2: "Betfair",
-      odds1: "1.95",
-      odds2: "2.1",
-      profit: "3.6%",
-      profitAmount: "$3.60",
-    },
-  ]
-
-  const ageInSeconds = Math.floor((new Date().getTime() - lastUpdated.getTime()) / 1000)
-  const isStale = ageInSeconds > 300 // 5 minutes
-  const isFresh = ageInSeconds < 60 // 1 minute
-  const needsRefresh = ageInSeconds > 120 // 2 minutes
+  const loadOpportunities = useCallback(async () => {
+    setError(null)
+    
+    try {
+      const response: OpportunitiesResponse = await fetchOpportunities(betType, bookie)
+      
+      // Transform the raw database rows to UI-friendly format
+      const transformedOpportunities = response.opportunities.map(row => 
+        transformOpportunityData(row, stake)
+      )
+      
+      setOpportunities(transformedOpportunities)
+      setLastUpdated(response.lastUpdated ? new Date(response.lastUpdated) : null)
+      setAgeInSeconds(response.ageInSeconds)
+      setIsStale(response.isStale)
+      setIsFresh(response.isFresh)
+      setNeedsRefresh(response.needsRefresh)
+    } catch (err) {
+      console.error('Error loading opportunities:', err)
+      setError(err instanceof Error ? err.message : "Failed to fetch opportunities")
+    }
+  }, [betType, bookie, stake])
 
   const refresh = async () => {
     setIsRefreshing(true)
     setError(null)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // First trigger a refresh of the data
+      await refreshOpportunities()
       
-      // Filter opportunities based on betType and bookie
-      let filteredOpportunities = mockOpportunities.filter(opp => {
-        if (betType !== "all" && opp.type.toLowerCase() !== betType) return false
-        if (bookie !== "all" && !opp.bookie1.toLowerCase().includes(bookie) && !opp.bookie2.toLowerCase().includes(bookie)) return false
-        return true
-      })
-      
-      setOpportunities(filteredOpportunities)
-      setLastUpdated(new Date())
+      // Then load the fresh data
+      await loadOpportunities()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch opportunities")
+      console.error('Error refreshing opportunities:', err)
+      setError(err instanceof Error ? err.message : "Failed to refresh opportunities")
     } finally {
       setIsRefreshing(false)
     }
   }
 
+  // Load opportunities when filters or stake change
   useEffect(() => {
     setIsLoading(true)
-    refresh().finally(() => setIsLoading(false))
-  }, [betType, bookie])
+    loadOpportunities().finally(() => setIsLoading(false))
+  }, [loadOpportunities])
 
+  // Update calculated fields when stake changes
+  useEffect(() => {
+    if (opportunities.length > 0) {
+      const updatedOpportunities = opportunities.map(opp => {
+        // Re-transform with new stake
+        const dbRow = {
+          sport: opp.sport,
+          bookie_1: opp.bookie1,
+          odds_1: opp.odds1,
+          team_1: opp.team1,
+          bookie_2: opp.bookie2,
+          odds_2: opp.odds2,
+          team_2: opp.team2,
+          stake_2: opp.stake2,
+          profit: opp.profit,
+          betfair_scalar: opp.betfairScalar,
+          bookie: opp.bookie,
+          bet_type: opp.betType,
+          timestamp: opp.timestamp
+        }
+        return transformOpportunityData(dbRow, stake)
+      })
+      setOpportunities(updatedOpportunities)
+    }
+  }, [stake])
+
+  // Auto-refresh timer
   useEffect(() => {
     if (!autoRefresh) return
 
     const interval = setInterval(() => {
-      if (ageInSeconds > 60) { // Auto-refresh if data is older than 1 minute
+      if (ageInSeconds && ageInSeconds > 60) { // Auto-refresh if data is older than 1 minute
         refresh()
       }
     }, refreshInterval)
@@ -122,10 +118,26 @@ export function useOpportunities({
     return () => clearInterval(interval)
   }, [autoRefresh, refreshInterval, ageInSeconds])
 
+  // Update age in real-time
+  useEffect(() => {
+    if (!lastUpdated) return
+
+    const interval = setInterval(() => {
+      const now = new Date()
+      const ageInSec = Math.floor((now.getTime() - lastUpdated.getTime()) / 1000)
+      setAgeInSeconds(ageInSec)
+      setIsStale(ageInSec > 300) // 5 minutes
+      setIsFresh(ageInSec < 60) // 1 minute
+      setNeedsRefresh(ageInSec > 120) // 2 minutes
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [lastUpdated])
+
   return {
     opportunities,
     lastUpdated,
-    ageInSeconds,
+    ageInSeconds: ageInSeconds ?? 0,
     isStale,
     isFresh,
     needsRefresh,
