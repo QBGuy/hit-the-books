@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase/client'
 
+
 interface AuthContextType {
   user: User | null
   loading: boolean
@@ -49,10 +50,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase!.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth state change:', event, session?.user ? 'User logged in' : 'No user')
         setUser(session?.user ?? null)
         setLoading(false)
+
+        // Log user actions for auth events
+        try {
+          if (session?.user && event === 'SIGNED_IN') {
+            await fetch('/api/user-actions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action_type: 'login',
+                action_details: {
+                  timestamp: new Date().toISOString(),
+                  source: 'google_oauth',
+                  event: event
+                }
+              })
+            })
+          } else if (event === 'SIGNED_OUT') {
+            await fetch('/api/user-actions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action_type: 'logout',
+                action_details: {
+                  timestamp: new Date().toISOString(),
+                  event: event
+                }
+              })
+            })
+          }
+        } catch (error) {
+          console.warn('Failed to log auth action:', error)
+        }
       }
     )
 

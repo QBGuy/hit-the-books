@@ -34,11 +34,31 @@ export async function GET(request: Request) {
         { status: 500 }
       )
     }
+
+    // Check data freshness (60-second threshold)
+    const now = new Date()
+    const FRESHNESS_THRESHOLD = 60 * 1000 // 60 seconds in milliseconds
+    
+    const lastUpdateTime = opportunities?.[0]?.timestamp 
+      ? new Date(opportunities[0].timestamp)
+      : null
+    
+    const ageInSeconds = lastUpdateTime 
+      ? Math.floor((now.getTime() - lastUpdateTime.getTime()) / 1000)
+      : null
+    
+    const isStale = ageInSeconds !== null && ageInSeconds > 60
+    const isFresh = ageInSeconds !== null && ageInSeconds <= 60
     
     return NextResponse.json({
       opportunities: opportunities || [],
       count: opportunities?.length || 0,
-      lastUpdated: opportunities?.[0]?.timestamp || null
+      lastUpdated: lastUpdateTime?.toISOString() || null,
+      ageInSeconds,
+      isStale,
+      isFresh,
+      freshnessThreshold: 60,
+      needsRefresh: isStale
     })
   } catch (error) {
     console.error('API Error:', error)
