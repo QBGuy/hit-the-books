@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { CheckCircle } from "lucide-react"
+import { formatCurrency } from "@/lib/betting/calculations"
 
 interface BetLoggingModalProps {
   isOpen: boolean
@@ -26,6 +27,8 @@ interface BetLoggingModalProps {
     bookie: string
   }
   userStake: number
+  calculatedStake1?: number
+  calculatedStake2?: number
   onSuccess: () => void
 }
 
@@ -34,10 +37,16 @@ export function BetLoggingModal({
   onClose,
   opportunity,
   userStake,
+  calculatedStake1,
+  calculatedStake2,
   onSuccess
 }: BetLoggingModalProps) {
   const [isLogging, setIsLogging] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+
+  // Use calculated stakes if available, otherwise fallback to userStake
+  const stake1Display = calculatedStake1 !== undefined ? calculatedStake1 : userStake
+  const stake2Display = calculatedStake2 !== undefined ? calculatedStake2 : userStake
 
   const handleLogBet = async () => {
     setIsLogging(true)
@@ -54,7 +63,8 @@ export function BetLoggingModal({
         bookie2: opportunity.bookie2,
         odds1: opportunity.odds1,
         odds2: opportunity.odds2,
-        stake: userStake,
+        stake1: stake1Display,
+        stake2: stake2Display,
         profit: opportunity.profit,
         betType: opportunity.betType
       })
@@ -112,7 +122,7 @@ export function BetLoggingModal({
                   <p className="font-semibold text-lg text-slate-900">{opportunity.team1}</p>
                   <p className="text-sm text-slate-500">{opportunity.bookie1}</p>
                   <p className="text-xl font-bold text-emerald-600">{opportunity.odds1}</p>
-                  <p className="text-lg font-bold text-slate-900 mt-1">${userStake}</p>
+                  <p className="text-lg font-bold text-slate-900 mt-1">{formatCurrency(stake1Display)}</p>
                 </div>
 
                 <div className="text-center">
@@ -123,11 +133,11 @@ export function BetLoggingModal({
                   <p className="font-semibold text-lg text-slate-900">{opportunity.team2}</p>
                   <p className="text-sm text-slate-500">{opportunity.bookie2}</p>
                   <p className="text-xl font-bold text-emerald-600">{opportunity.odds2}</p>
-                  <p className="text-lg font-bold text-slate-900 mt-1">${userStake}</p>
+                  <p className="text-lg font-bold text-slate-900 mt-1">{formatCurrency(stake2Display)}</p>
                 </div>
 
                 <div className="text-center bg-emerald-50 rounded-lg p-3">
-                  <p className="text-xl font-bold text-emerald-600">${opportunity.profit.toFixed(2)}</p>
+                  <p className="text-xl font-bold text-emerald-600">{formatCurrency(opportunity.profit)}</p>
                   <p className="text-xs text-slate-600">Expected Profit</p>
                 </div>
               </div>

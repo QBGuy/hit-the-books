@@ -27,6 +27,8 @@ export interface Opportunity {
   calculatedStake2?: number
   calculatedProfit?: number
   calculatedProfitAmount?: string
+  calculatedOutlay?: number
+  calculatedTotalPayout?: number
 }
 
 // Simple hash function for generating consistent unique IDs
@@ -86,7 +88,9 @@ export function transformOpportunityData(
     calculatedStake1: calculations.stake1,
     calculatedStake2: calculations.stake2,
     calculatedProfit: calculations.profit,
-    calculatedProfitAmount: formatCurrency(calculations.profit)
+    calculatedProfitAmount: formatCurrency(calculations.profit),
+    calculatedOutlay: calculations.outlay,
+    calculatedTotalPayout: calculations.totalPayout
   }
 }
 

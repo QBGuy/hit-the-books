@@ -60,15 +60,6 @@ export function calculateBetOutcomes(input: BetCalculationInput): BetCalculation
   // Profit percentage is now directly from the API value
   const profitPercentage = profit / stake * 100  // No need to multiply by 100 as API already provides percentage
 
-  // Log calculations for debugging
-  console.log('Bet Calculations:', {
-    type: isBonus ? 'Bonus' : 'Turnover',
-    stakes: { stake1, stake2, payoutStake1 },
-    odds: { effectiveOdds1, effectiveOdds2 },
-    payouts: { payout1, payout2 },
-    summary: { outlay, totalPayout, profit, profitPercentage }
-  })
-
   return {
     stake1,
     stake2,

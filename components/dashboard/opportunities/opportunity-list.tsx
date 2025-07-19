@@ -64,6 +64,14 @@ export function OpportunityList({ opportunities, stake, betType, onRefresh }: Op
             onLogBet={() => handleLogBet(opportunity)}
             type="opportunity"
             showLogButton={true}
+            // Pass calculated values to BetCard
+            calculatedStake1={opportunity.calculatedStake1}
+            calculatedStake2={opportunity.calculatedStake2}
+            calculatedOutlay={opportunity.calculatedOutlay}
+            calculatedTotalPayout={opportunity.calculatedTotalPayout}
+            calculatedProfit={opportunity.calculatedProfit}
+            betfairScalar={opportunity.betfairScalar}
+            betType={opportunity.betType}
           />
         ))}
       </div>
@@ -87,6 +95,8 @@ export function OpportunityList({ opportunities, stake, betType, onRefresh }: Op
             bookie: loggingOpportunity.bookie
           }}
           userStake={stake}
+          calculatedStake1={loggingOpportunity.calculatedStake1}
+          calculatedStake2={loggingOpportunity.calculatedStake2}
           onSuccess={handleModalSuccess}
         />
       )}

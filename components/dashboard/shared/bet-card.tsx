@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { formatCurrency, formatPercentage } from "@/lib/betting/calculations"
+import { formatCurrency, formatPercentage, calculateBetOutcomes } from "@/lib/betting/calculations"
 
 interface BetCardProps {
   sport: string
@@ -24,6 +24,14 @@ interface BetCardProps {
   date?: string
   status?: string
   type?: "opportunity" | "log"
+  // Additional calculation props for opportunities
+  calculatedStake1?: number
+  calculatedStake2?: number
+  calculatedOutlay?: number
+  calculatedTotalPayout?: number
+  calculatedProfit?: number
+  betfairScalar?: number
+  betType?: "bonus" | "turnover"
 }
 
 export function BetCard({
@@ -43,18 +51,48 @@ export function BetCard({
   showLogButton = false,
   date,
   status,
-  type = "opportunity"
+  type = "opportunity",
+  calculatedStake1,
+  calculatedStake2,
+  calculatedOutlay,
+  calculatedTotalPayout,
+  calculatedProfit,
+  betfairScalar = 1,
+  betType = "turnover"
 }: BetCardProps) {
-  const calculateProfit = () => {
-    const stakeAmount = stake
-    const payout1 = stakeAmount * odds1
-    const payout2 = stakeAmount * odds2
-    const totalOutlay = stakeAmount * 2
-    const totalPayout = Math.min(payout1, payout2)
-    return (totalPayout - totalOutlay).toFixed(2)
-  }
+  
+  // Use proper calculations if we have the required data, otherwise fallback to simple calculation
+  const calculations = (calculatedStake1 !== undefined && calculatedStake2 !== undefined) 
+    ? {
+        stake1: calculatedStake1,
+        stake2: calculatedStake2,
+        outlay: calculatedOutlay || (calculatedStake1 + calculatedStake2),
+        totalPayout: calculatedTotalPayout || Math.min(stake * odds1, stake * odds2),
+        profit: calculatedProfit || 0
+      }
+    : (() => {
+        // Fallback calculation for log entries that don't have calculated fields
+        const isBonus = betType === "bonus"
+        const result = calculateBetOutcomes({
+          stake,
+          odds1,
+          odds2,
+          stake2Ratio: calculatedStake2 ? calculatedStake2 / stake : 1, // Use ratio if available
+          betfairScalar,
+          isBonus,
+          bookie1,
+          bookie2
+        })
+        return {
+          stake1: result.stake1,
+          stake2: result.stake2,
+          outlay: result.outlay,
+          totalPayout: result.totalPayout,
+          profit: result.profit
+        }
+      })()
 
-  const calculatedProfit = profit || formatCurrency(Number(calculateProfit()))
+  const calculatedProfitDisplay = profit || formatCurrency(calculations.profit)
   const displayProfitPercentage = profitPercentage ? formatPercentage(profitPercentage) : null
 
   return (
@@ -64,7 +102,7 @@ export function BetCard({
       } ${isExpanded ? "border-emerald-500" : ""}`}
       onClick={onClick}
     >
-      <CardContent className="p-4">
+      <CardContent className="p-6">
         <div className="space-y-4">
           {/* Header Row with Sport and Teams */}
           <div className="grid grid-cols-5 gap-6 items-center">
@@ -79,7 +117,9 @@ export function BetCard({
               <p className="font-semibold text-lg text-slate-900">{team1}</p>
               <p className="text-sm text-slate-500">{bookie1}</p>
               <p className="text-xl font-bold text-emerald-600">{odds1.toFixed(2)}</p>
-              <p className="text-lg font-bold text-slate-900 mt-1">{formatCurrency(stake)}</p>
+              <p className="text-lg font-bold text-slate-900 mt-1">
+                {formatCurrency(calculations.stake1)}
+              </p>
             </div>
 
             <div className="text-center">
@@ -90,11 +130,13 @@ export function BetCard({
               <p className="font-semibold text-lg text-slate-900">{team2}</p>
               <p className="text-sm text-slate-500">{bookie2}</p>
               <p className="text-xl font-bold text-emerald-600">{odds2.toFixed(2)}</p>
-              <p className="text-lg font-bold text-slate-900 mt-1">{formatCurrency(stake)}</p>
+              <p className="text-lg font-bold text-slate-900 mt-1">
+                {formatCurrency(calculations.stake2)}
+              </p>
             </div>
 
             <div className="text-center bg-emerald-50 rounded-lg p-3">
-              <p className="text-xl font-bold text-emerald-600">{calculatedProfit}</p>
+              <p className="text-xl font-bold text-emerald-600">{calculatedProfitDisplay}</p>
               <p className="text-xs text-slate-600">
                 Profit {displayProfitPercentage && `(${displayProfitPercentage})`}
               </p>
@@ -103,19 +145,19 @@ export function BetCard({
           </div>
 
           {/* Expanded Summary Row */}
-          {isExpanded && type === "opportunity" && (
+          {isExpanded && (
             <>
               <Separator />
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center bg-slate-50 rounded-lg p-3">
                   <p className="text-lg font-bold text-slate-900">
-                    {formatCurrency(stake * 2)}
+                    {formatCurrency(calculations.outlay)}
                   </p>
                   <p className="text-xs text-slate-600">Outlay</p>
                 </div>
                 <div className="text-center bg-emerald-50 rounded-lg p-3">
                   <p className="text-lg font-bold text-emerald-600">
-                    {formatCurrency(Math.min(stake * odds1, stake * odds2))}
+                    {formatCurrency(calculations.totalPayout)}
                   </p>
                   <p className="text-xs text-slate-600">Guaranteed Payout</p>
                 </div>
