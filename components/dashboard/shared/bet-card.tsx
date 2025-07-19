@@ -117,8 +117,12 @@ export function BetCard({
               <p className="font-semibold text-lg text-slate-900">{team1}</p>
               <p className="text-sm text-slate-500">{bookie1}</p>
               <p className="text-xl font-bold text-emerald-600">{odds1.toFixed(2)}</p>
-              <p className="text-lg font-bold text-slate-900 mt-1">
-                {formatCurrency(calculations.stake1)}
+              <p className="text-lg font-bold mt-1">
+                {betType === "bonus" ? (
+                  <span className="text-emerald-600">{formatCurrency(stake)} bonus</span>
+                ) : (
+                  <span className="text-slate-900">{formatCurrency(calculations.stake1)}</span>
+                )}
               </p>
             </div>
 

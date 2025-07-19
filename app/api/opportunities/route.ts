@@ -9,11 +9,11 @@ export async function GET(request: Request) {
     
     const supabase = await createClient()
     
-    // Build query based on filters
+    // Build query based on filters - sort by profit descending for highest profit first
     let query = supabase
       .from('opportunities')
       .select('*')
-      .order('timestamp', { ascending: false })
+      .order('profit', { ascending: false })
     
     // Apply bet type filter
     if (betType !== 'all') {
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       )
     }
 
-    // Check data freshness (60-second threshold)
+    // Check data freshness using UTC time (standard for age calculation)
     const now = new Date()
     const FRESHNESS_THRESHOLD = 60 * 1000 // 60 seconds in milliseconds
     

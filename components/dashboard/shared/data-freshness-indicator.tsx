@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Loader2, RefreshCw, Clock, CheckCircle, AlertCircle } from "lucide-react"
+import moment from "moment-timezone"
 
 interface DataFreshnessIndicatorProps {
   lastUpdated: Date | null
@@ -53,6 +54,11 @@ export function DataFreshnessIndicator({
     return formatAge(ageInSeconds)
   }
 
+  // Convert UTC timestamp to Sydney time for display
+  const formatSydneyTime = (date: Date): string => {
+    return moment(date).tz("Australia/Sydney").format("h:mm:ss A")
+  }
+
   return (
     <div className="flex items-center gap-3">
       <Badge variant={getFreshnessColor()} className="text-xs">
@@ -77,7 +83,7 @@ export function DataFreshnessIndicator({
       
       {lastUpdated && (
         <span className="text-xs text-slate-500">
-          Last updated: {lastUpdated.toLocaleTimeString()}
+          Last updated: {formatSydneyTime(lastUpdated)} (Sydney)
         </span>
       )}
     </div>

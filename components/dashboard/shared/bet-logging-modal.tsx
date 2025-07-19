@@ -122,7 +122,13 @@ export function BetLoggingModal({
                   <p className="font-semibold text-lg text-slate-900">{opportunity.team1}</p>
                   <p className="text-sm text-slate-500">{opportunity.bookie1}</p>
                   <p className="text-xl font-bold text-emerald-600">{opportunity.odds1}</p>
-                  <p className="text-lg font-bold text-slate-900 mt-1">{formatCurrency(stake1Display)}</p>
+                  <p className="text-lg font-bold mt-1">
+                    {opportunity.betType === "bonus" ? (
+                      <span className="text-emerald-600">{formatCurrency(userStake)} bonus</span>
+                    ) : (
+                      <span className="text-slate-900">{formatCurrency(stake1Display)}</span>
+                    )}
+                  </p>
                 </div>
 
                 <div className="text-center">
