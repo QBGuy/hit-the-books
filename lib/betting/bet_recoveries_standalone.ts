@@ -64,8 +64,9 @@ function createStandaloneClient() {
 function sydneyTimestamp(): string {
   // Create current timestamp in ISO format - ensure we get the actual current time
   const now = new Date(Date.now())
-  console.log('Generated timestamp:', now.toISOString())
-  return now.toISOString()
+  const timestamp = now.toISOString() // This includes the 'Z' suffix for UTC
+  console.log('Generated timestamp:', timestamp)
+  return timestamp
 }
 
 function betfairScalars(data: any[]): any[] {

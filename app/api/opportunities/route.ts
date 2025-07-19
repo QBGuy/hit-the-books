@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { calculateDataAge, isDataFresh } from '@/lib/utils/timestamp-utils'
 
 export async function GET(request: Request) {
   try {
@@ -35,16 +36,14 @@ export async function GET(request: Request) {
       )
     }
 
-    // Check data freshness using UTC time (standard for age calculation)
-    const now = new Date()
-    const FRESHNESS_THRESHOLD = 60 * 1000 // 60 seconds in milliseconds
+    // Check data freshness using the timestamp utilities
     
     const lastUpdateTime = opportunities?.[0]?.timestamp 
       ? new Date(opportunities[0].timestamp)
       : null
     
-    const ageInSeconds = lastUpdateTime 
-      ? Math.floor((now.getTime() - lastUpdateTime.getTime()) / 1000)
+    const ageInSeconds = opportunities?.[0]?.timestamp 
+      ? calculateDataAge(opportunities[0].timestamp)
       : null
     
     const isStale = ageInSeconds !== null && ageInSeconds > 60

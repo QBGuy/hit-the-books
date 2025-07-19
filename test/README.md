@@ -1,4 +1,118 @@
-# 🚀 Bet Recoveries Implementation & Testing
+# 🧪 Test Suite - Hit the Books
+
+## 🆕 New Timestamp & Timezone Tests
+
+### Issue Description
+The application has been experiencing an issue where the data freshness indicator shows data as "10 hours old" even when data was recently refreshed. This appears to be related to timezone handling between UTC and Sydney time.
+
+### Test Files
+
+#### 1. `test-timestamp-timezone.ts`
+**Comprehensive timestamp and timezone test**
+- Runs bet_recoveries to refresh opportunities table
+- Pulls opportunities table data
+- Analyzes timestamps in Sydney time vs UTC
+- Verifies data freshness calculations
+- Identifies timezone conversion issues
+
+Usage:
+```bash
+npx ts-node test/test-timestamp-timezone.ts
+```
+
+#### 2. `verify-database-timestamps.ts`
+**Database timestamp verification test**
+- Checks current database state
+- Analyzes timestamp formats and calculations
+- Tests API response for freshness
+- Provides specific recommendations
+
+Usage:
+```bash
+npx ts-node test/verify-database-timestamps.ts
+# OR
+node test/run-timestamp-verification.js
+```
+
+#### 3. `test-timestamp-issue.ts`
+**Direct timestamp issue analysis**
+- Simulates the sydneyTimestamp() function behavior
+- Tests for timezone confusion
+- Shows the likely cause of the "10 hours old" issue
+- Provides clear recommendations
+
+Usage:
+```bash
+npx ts-node test/test-timestamp-issue.ts
+```
+
+### Expected Issues to Find
+
+1. **sydneyTimestamp() function**: Despite its name, it returns UTC time (`new Date().toISOString()`)
+2. **Mixed timezone handling**: Some parts of the app may be mixing UTC and Sydney timezone calculations
+3. **Data freshness calculation**: The 10-hour discrepancy likely comes from timezone offset confusion
+
+### How to Run Tests
+
+#### Individual Tests
+```bash
+# Comprehensive test
+npx ts-node test/test-timestamp-timezone.ts
+
+# Database verification
+npx ts-node test/verify-database-timestamps.ts
+
+# Issue analysis
+npx ts-node test/test-timestamp-issue.ts
+```
+
+#### Using the Test Runners
+```bash
+# Database verification with runner
+node test/run-timestamp-verification.js
+
+# Timestamp test with runner
+node test/run-timestamp-test.js
+```
+
+### Understanding the Results
+
+#### Fresh Data (Expected)
+- Age in seconds: < 60
+- Is fresh: true
+- Is stale: false
+
+#### Stale Data (10+ hours old - Issue)
+- Age in seconds: > 36000 (10+ hours)
+- Is fresh: false
+- Is stale: true
+- Likely cause: Timezone offset confusion
+
+#### What to Look For
+- **Large age values**: If data shows as hours old when it should be minutes
+- **Timezone offset discrepancies**: Differences between UTC and Sydney calculations
+- **Double timezone conversion**: Converting Sydney time to Sydney time again
+
+### Recommendations Based on Test Results
+
+1. **If sydneyTimestamp() is the issue**:
+   - Rename to `utcTimestamp()` for clarity
+   - OR fix it to return actual Sydney time
+   - Ensure consistent usage throughout the app
+
+2. **If mixed timezone handling is found**:
+   - Use UTC for all internal calculations
+   - Only convert to Sydney time for display
+   - Ensure API responses provide UTC timestamps
+
+3. **If double conversion is happening**:
+   - Check data-freshness-indicator.tsx component
+   - Verify that ageInSeconds comes from server-side UTC calculation
+   - Ensure formatSydneyTime() only formats, doesn't calculate age
+
+---
+
+## 🚀 Existing Bet Recoveries Tests
 
 ## ✅ Successfully Implemented
 

@@ -1,8 +1,8 @@
 # 🏗️ Technical Architecture
 
 **Project**: Hit the Books  
-**Version**: 1.0  
-**Last Updated**: December 2024
+**Version**: 1.1  
+**Last Updated**: January 2025
 
 ---
 
@@ -62,46 +62,157 @@ SUPABASE_SERVICE_ROLE_KEY
 
 ---
 
-## 📁 Ultimate Project Structure
+## 📁 Current Project Structure
 
 ```
 hit-the-books/
 ├── app/                              # Next.js 15 App Router
 │   ├── (auth)/                      # Auth route group
-│   │   ├── login/
-│   │   │   └── page.tsx            # Login page
-│   │   └── auth/
-│   │       └── callback/
-│   │           └── route.ts        # Auth callback handler
+│   │   ├── auth/                    # Auth handlers
+│   │   ├── auth-code-error/         # Auth error page
+│   │   └── login/                   # Login page
+│   │       └── page.tsx            
 │   ├── (dashboard)/                 # Protected dashboard routes
-│   │   ├── dashboard/
-│   │   │   ├── page.tsx            # Main dashboard
-│   │   │   └── loading.tsx         # Dashboard loading
-│   │   └── layout.tsx              # Dashboard layout wrapper
+│   │   └── dashboard/              # Main dashboard
+│   │       └── page.tsx            
+│   ├── (dashboard)dashboard/        # Alternative dashboard route
 │   ├── api/                        # API routes
-│   │   ├── opportunities/
-│   │   │   ├── route.ts           # Fetch opportunities
-│   │   │   └── refresh/
-│   │   │       └── route.ts       # Force refresh opportunities
-│   │   ├── bets/
-│   │   │   ├── route.ts           # CRUD bet logs
-│   │   │   └── [id]/
-│   │   │       └── route.ts       # Individual bet operations
-│   │   └── user-actions/
-│   │       └── route.ts           # Log user actions
+│   │   ├── opportunities/          # Fetch opportunities
+│   │   ├── bets/                   # CRUD bet logs  
+│   │   └── user-actions/           # Log user actions
 │   ├── globals.css                 # Global styles
 │   ├── layout.tsx                  # Root layout
-│   ├── page.tsx                    # Landing page
-│   ├── loading.tsx                 # Global loading component
-│   └── not-found.tsx              # 404 page
+│   └── page.tsx                    # Landing page
 ├── components/                      # Feature components
 │   ├── auth/                       # Authentication components
-│   │   ├── login-button.tsx       # Google login button
-│   │   ├── logout-button.tsx      # Logout functionality
-│   │   ├── auth-provider.tsx      # Auth context provider
-│   │   └── protected-route.tsx    # Route protection wrapper
+│   │   └── auth-provider.tsx      # Auth context provider
+│   ├── commons/                    # Common reusable components
 │   ├── dashboard/                  # Dashboard feature components
-│   │   ├── controls-panel.tsx         # All controls (bet type, stake, bookie, refresh) in one file
+│   │   ├── controls-panel.tsx     # All controls (bet type, stake, bookie, refresh)
+│   │   ├── dashboard-layout.tsx   # Main dashboard container
+│   │   ├── opportunities/         # Opportunities tab components
+│   │   ├── logs/                  # Logs tab components
+│   │   └── shared/                # Shared dashboard components
+│   │       ├── bet-card.tsx       # Reusable bet display
+│   │       ├── bet-logging-modal.tsx # Bet logging functionality
+│   │       ├── dashboard-header.tsx # Header with logo/user
+│   │       └── data-freshness-indicator.tsx # Data age indicator
+│   ├── landing/                   # Landing page components
+│   ├── theme-provider.tsx         # Theme context provider
+│   └── ui/                        # shadcn/ui components
+│       ├── accordion.tsx
+│       ├── alert-dialog.tsx
+│       ├── alert.tsx
+│       ├── aspect-ratio.tsx
+│       ├── avatar.tsx
+│       ├── badge.tsx
+│       ├── breadcrumb.tsx
+│       ├── button.tsx
+│       ├── calendar.tsx
+│       ├── card.tsx
+│       ├── carousel.tsx
+│       ├── chart.tsx
+│       ├── checkbox.tsx
+│       ├── collapsible.tsx
+│       ├── command.tsx
+│       ├── context-menu.tsx
+│       ├── dialog.tsx
+│       ├── drawer.tsx
+│       ├── dropdown-menu.tsx
+│       ├── error-boundary.tsx
+│       ├── form.tsx
+│       ├── hover-card.tsx
+│       ├── input-otp.tsx
+│       ├── input.tsx
+│       ├── label.tsx
+│       ├── loading-spinner.tsx
+│       ├── menubar.tsx
+│       ├── navigation-menu.tsx
+│       ├── pagination.tsx
+│       ├── popover.tsx
+│       ├── progress.tsx
+│       ├── radio-group.tsx
+│       ├── resizable.tsx
+│       ├── scroll-area.tsx
+│       ├── select.tsx
+│       ├── separator.tsx
+│       ├── sheet.tsx
+│       ├── sidebar.tsx
+│       ├── skeleton.tsx
+│       ├── slider.tsx
+│       ├── sonner.tsx
+│       ├── switch.tsx
+│       ├── table.tsx
+│       ├── tabs.tsx
+│       ├── textarea.tsx
+│       ├── toast.tsx
+│       ├── toaster.tsx
+│       ├── toggle-group.tsx
+│       ├── toggle.tsx
+│       ├── tooltip.tsx
+│       ├── use-mobile.tsx
+│       └── use-toast.ts
+├── hooks/                         # Custom React hooks
+│   ├── use-mobile.tsx            # Mobile detection hook
+│   ├── use-opportunities.ts      # Opportunities data hook
+│   ├── use-toast.ts             # Toast notifications hook
+│   └── use-user-actions.ts      # User actions logging hook
+├── lib/                           # Core utilities and configurations
+│   ├── api/                      # API utilities
+│   ├── auth/                     # Authentication utilities
+│   ├── betting/                  # Betting logic modules
+│   │   ├── bet_recoveries.ts     # Bet recovery processing
+│   │   ├── bet_recoveries_standalone.ts # Standalone recovery logic
+│   │   ├── calculations.ts       # Bet calculations
+│   │   └── opportunities.ts      # Opportunity fetching
+│   ├── supabase/                 # Supabase integration
+│   │   ├── client.ts            # Browser client
+│   │   ├── middleware.ts        # Auth middleware
+│   │   └── server.ts            # Server client
+│   └── utils.ts                  # General utilities
+├── types/                         # TypeScript type definitions
+│   └── database.ts               # Database types
+├── hooks/                         # Additional custom hooks (duplicate noted)
+├── public/                        # Static assets
+│   └── hit-the-books-logo.png   # App logo
+├── reference/                     # Legacy/reference implementations
+│   ├── auth-supabase/           # Reference auth implementation
+│   ├── bet-opportunities/       # Reference betting logic
+│   └── ui/                      # Reference UI components
+├── scripts/                       # Build and deployment scripts
+│   └── setup-database.sql       # Database setup script
+├── styles/                        # Additional styles
+│   └── globals.css              # Global CSS overrides
+├── test/                          # Test files and utilities
+│   ├── check-fresh-data.ts      # Data freshness testing
+│   ├── debug-database.ts        # Database debugging
+│   ├── README.md                # Test documentation
+│   ├── run-bet-recoveries.js    # Bet recovery testing
+│   ├── run-test.js              # General test runner
+│   ├── simple-test.ts           # Simple test cases
+│   ├── test-bet-recoveries.ts   # Bet recovery tests
+│   └── test-calculations-alignment.ts # Calculation tests
+├── z-docs/                        # Documentation
+│   ├── architecture.md          # Technical architecture (this file)
+│   ├── instructions.md          # Development instructions
+│   ├── prd.md                   # Product requirements
+│   └── tasks.md                 # Development tasks
+├── components.json               # shadcn/ui configuration
+├── middleware.ts                 # Next.js middleware
+├── next-env.d.ts                # Next.js type definitions
+├── next.config.mjs              # Next.js configuration
+├── package.json                 # Dependencies
+├── pnpm-lock.yaml              # Package lock file
+├── postcss.config.mjs          # PostCSS configuration
+├── prd.md                      # Product requirements (root level)
+├── tailwind.config.ts          # Tailwind configuration
+├── tsconfig.json               # TypeScript configuration
+└── README.md                   # Project documentation
+```
+│   │   ├── auth-provider.tsx      # Auth context provider
+│   ├── commons/                   # Common reusable components  
+│   ├── dashboard/                  # Dashboard feature components
+│   │   ├── controls-panel.tsx     # All controls (bet type, stake, bookie, refresh) in one file
 │   │   ├── opportunities/         # Opportunities tab components
 │   │   │   ├── opportunity-card.tsx    # Individual opportunity
 │   │   │   ├── opportunity-list.tsx    # List of opportunities
@@ -110,7 +221,9 @@ hit-the-books/
 │   │   │   └── export-logs.tsx         # Export functionality
 │   │   ├── shared/                # Shared dashboard components
 │   │   │   ├── bet-card.tsx            # Reusable bet display for logs and opps
-│   │   │   └── dashboard-header.tsx    # Header with logo/user
+│   │   │   ├── bet-logging-modal.tsx   # Bet logging functionality
+│   │   │   ├── dashboard-header.tsx    # Header with logo/user
+│   │   │   └── data-freshness-indicator.tsx # Data age and refresh indicator
 │   │   └── dashboard-layout.tsx   # Main dashboard container
 │   ├── landing/                   # Landing page components
 │   │   ├── hero-section.tsx       # Main hero
@@ -118,10 +231,11 @@ hit-the-books/
 │   │   ├── testimonials.tsx       # User testimonials
 │   │   ├── pricing-section.tsx    # Pricing (if applicable)
 │   │   └── cta-section.tsx        # Call to action
+│   ├── theme-provider.tsx         # Theme context provider (Dark/Light mode)
 │   ├── ui/                        # shadcn/ui components
-│   │   ├── [existing shadcn components]
+│   │   ├── [comprehensive shadcn component library]
 │   │   └── ...
-│   └── common/                    # Common reusable components
+│   └── commons/                   # Common reusable components (Note: appears in both locations)
 │       ├── loading-spinner.tsx    # Loading states
 │       ├── error-boundary.tsx     # Error handling
 │       ├── toast-notifications.tsx # Toast system
@@ -130,13 +244,12 @@ hit-the-books/
 │   ├── supabase/                  # Supabase integration
 │   │   ├── client.ts             # Browser client
 │   │   ├── server.ts             # Server client
-│   │   ├── middleware.ts         # Auth middleware
-│   │   └── types.ts              # Database types
+│   │   └── middleware.ts         # Auth middleware
 │   ├── betting/                   # Betting logic modules
+│   │   ├── bet_recoveries.ts     # Bet recovery processing
+│   │   ├── bet_recoveries_standalone.ts # Standalone recovery logic  
 │   │   ├── calculations.ts        # Bet calculations
-│   │   ├── opportunities.ts       # Opportunity fetching
-│   │   ├── data-refresh.ts        # Refresh logic
-│   │   └── types.ts              # Betting types
+│   │   └── opportunities.ts       # Opportunity fetching
 │   ├── auth/                      # Authentication utilities
 │   │   ├── session.ts            # Session management
 │   │   ├── user-actions.ts       # Action logging
@@ -148,10 +261,10 @@ hit-the-books/
 │   ├── utils.ts                   # General utilities
 │   └── constants.ts               # App constants
 ├── hooks/                         # Custom React hooks
-│   ├── use-auth.ts               # Authentication hook
+│   ├── use-mobile.tsx            # Mobile detection hook
 │   ├── use-opportunities.ts      # Opportunities data hook
-│   ├── use-bet-logs.ts           # Bet logs hook
-│   ├── use-calculations.ts       # Bet calculations hook
+│   ├── use-toast.ts             # Toast notifications hook
+│   └── use-user-actions.ts      # User actions logging hook
 ├── types/                         # TypeScript type definitions
 │   ├── database.ts               # Database types
 │   ├── betting.ts                # Betting-related types
@@ -162,17 +275,31 @@ hit-the-books/
 │   ├── hit-the-books-logo.png   # App logo
 │   ├── favicon.ico              # Favicon
 │   └── images/                  # Image assets
+├── reference/                     # Legacy/reference implementations
+│   ├── auth-supabase/           # Reference auth implementation
+│   ├── bet-opportunities/       # Reference betting logic
+│   └── ui/                      # Reference UI components
+├── scripts/                       # Build and deployment scripts
+│   ├── setup-database.sql       # Database setup script
+│   ├── migrate.ts               # Database migrations (future)
+│   └── seed-data.ts             # Sample data seeding (future)
 ├── styles/                        # Additional styles
 │   └── globals.css              # Global CSS overrides
-├── scripts/                       # Build and deployment scripts
-│   ├── setup-db.ts              # Database setup
-│   ├── migrate.ts               # Database migrations
-│   └── seed-data.ts             # Sample data seeding
+├── test/                          # Test files and utilities
+│   ├── check-fresh-data.ts      # Data freshness testing
+│   ├── debug-database.ts        # Database debugging
+│   ├── README.md                # Test documentation
+│   ├── run-bet-recoveries.js    # Bet recovery testing
+│   ├── run-test.js              # General test runner
+│   ├── simple-test.ts           # Simple test cases
+│   ├── test-bet-recoveries.ts   # Bet recovery tests
+│   └── test-calculations-alignment.ts # Calculation tests
 ├── z-docs/                        # Documentation
+│   ├── architecture.md          # Technical architecture (this file)
+│   ├── instructions.md          # Development instructions
 │   ├── prd.md                   # Product requirements
-│   ├── architecture.md          # Technical architecture
-│   ├── tasks.md                 # Development tasks
-│   └── api-docs.md              # API documentation
+│   └── tasks.md                 # Development tasks
+├── components.json               # shadcn/ui configuration
 ├── .env.local                     # Environment variables
 ├── .env.example                   # Environment template
 ├── next.config.mjs               # Next.js configuration
@@ -180,8 +307,57 @@ hit-the-books/
 ├── tsconfig.json                 # TypeScript configuration
 ├── package.json                  # Dependencies
 ├── pnpm-lock.yaml               # Lock file
+├── postcss.config.mjs           # PostCSS configuration
+├── prd.md                       # Product requirements (root level)
 └── README.md                     # Project documentation
 ```
+
+---
+
+## 🆕 Recent Implementation Updates
+
+### New Key Components Implemented
+
+#### Data Freshness System
+- **`data-freshness-indicator.tsx`**: Real-time data age monitoring with visual indicators
+- **Features**: Age calculation, refresh states, Sydney timezone display  
+- **Integration**: Used across opportunities and logs views for data transparency
+
+#### Enhanced Bet Management
+- **`bet-logging-modal.tsx`**: Centralized bet logging functionality
+- **`bet-card.tsx`**: Unified bet display component for opportunities and logs
+- **Improved UX**: Consistent bet interaction patterns across the application
+
+#### Theme Management
+- **`theme-provider.tsx`**: Dark/light mode support
+- **Integration**: Consistent theming across all UI components
+
+#### Comprehensive UI Library
+- **Complete shadcn/ui implementation**: 40+ production-ready components
+- **Mobile-responsive**: All components optimized for mobile devices
+- **Accessibility**: WCAG compliant implementations
+
+#### Advanced Betting Logic
+- **`bet_recoveries.ts`**: Production bet recovery processing
+- **`bet_recoveries_standalone.ts`**: Standalone recovery logic for testing
+- **Enhanced calculations**: More sophisticated betting mathematics
+
+#### Testing Infrastructure
+- **Comprehensive test suite**: Data freshness, calculations, and database testing
+- **Debug utilities**: Database debugging and testing tools
+- **Quality assurance**: Alignment testing for betting calculations
+
+### Structural Improvements
+
+#### Route Organization
+- **Route groups**: Proper separation of authenticated and public routes
+- **Alternative routing**: Multiple dashboard access patterns implemented
+- **API structure**: Well-organized API endpoints for different functionalities
+
+#### Hook Architecture
+- **Custom hooks**: Specialized hooks for opportunities, user actions, and mobile detection
+- **State management**: Efficient state handling across components
+- **Reusability**: Shared logic extraction into custom hooks
 
 ---
 
@@ -284,6 +460,7 @@ Any User Action → user_actions table → Analytics/Monitoring
 ### Component Hierarchy
 ```
 App Layout (Root)
+├── Theme Provider (Dark/Light mode)
 ├── Landing Page (/) - Unauthenticated
 │   ├── Hero Section
 │   ├── Features Section
@@ -302,15 +479,25 @@ App Layout (Root)
     └── Main Content (Tabs)
         ├── Opportunities Tab
         │   ├── Data Freshness Indicator
+        │   │   ├── Age Display (seconds/minutes/hours)
+        │   │   ├── Refresh Status (Fresh/Stale/Refreshing)
+        │   │   ├── Sydney Time Display
+        │   │   └── Manual Refresh Button
         │   ├── Opportunity List
-        │   │   └── Opportunity Card (reusable)
+        │   │   └── Bet Card (reusable)
         │   │       ├── Profit Calculator
-        │   │       └── Log Bet Modal
+        │   │       └── Bet Logging Modal
+        │   │           ├── Bet Details Form
+        │   │           ├── Stake Validation
+        │   │           └── Confirmation Actions
         │   └── Empty State
         └── Logs Tab
+            ├── Data Freshness Indicator
             ├── Log Filters
             ├── Bet Log List
-            │   └── Bet Log Card (reusable)
+            │   └── Bet Card (reusable)
+            │       ├── Edit/Delete Actions
+            │       └── Performance Metrics
             ├── Export Logs
             └── Empty State
 ```
@@ -323,12 +510,16 @@ App Layout (Root)
 - **Accessibility**: WCAG compliant with proper ARIA labels
 
 ### Key Reusable Components
-- **BetCard**: Unified bet display for opportunities and logs
+- **BetCard**: Unified bet display for opportunities and logs with contextual actions
+- **DataFreshnessIndicator**: Real-time data age monitoring with timezone awareness
+- **BetLoggingModal**: Centralized bet logging with validation and confirmation
+- **ThemeProvider**: Dark/light mode support with system preference detection
 - **TabNavigation**: Consistent tab switching with state management
 - **ControlsPanel**: Centralized filtering and configuration
-- **LoadingStates**: Skeleton loading for different content types
+- **LoadingStates**: Skeleton loading for different content types (Spinner, Skeleton)
 - **ErrorBoundary**: Graceful error handling at component level
 - **ConfirmationDialog**: Standard confirmation patterns
+- **MobileDetection**: Responsive behavior adaptation (via use-mobile hook)
 
 ---
 
@@ -392,45 +583,63 @@ Git Push → GitHub Actions → Build & Test → Deploy to Vercel → Health Che
 
 ---
 
-## 🔄 Migration Strategy from Reference Code
+## 🔄 Migration Status and Next Steps
 
-### Current State Analysis
-The `reference/` folder contains working implementations that need to be refactored and integrated:
+### ✅ Completed Migrations
 
-| Reference Component | Target Location | Migration Notes |
-|-------------------|----------------|-----------------|
-| `reference/ui/landing-page.tsx` | `components/landing/` | Split into smaller feature components |
-| `reference/ui/sports-betting-dashboard.tsx` | `components/dashboard/` | Break monolithic component into focused modules |
-| `reference/bet-opportunities/bet-calculations.ts` | `lib/betting/calculations.ts` | Move logic to lib, create React hooks wrapper |
-| `reference/bet-opportunities/get-opportunities.ts` | `lib/betting/opportunities.ts` | Refactor for Next.js API routes |
-| `reference/bet-opportunities/bet_recoveries.js` | `scripts/` or `lib/betting/` | Convert to TypeScript, integrate with API routes |
-| `reference/auth-supabase/` | `lib/supabase/` & `components/auth/` | Separate client/server code, create auth components |
+The following components have been successfully migrated from the `reference/` folder:
 
-### Migration Steps
+| Reference Component | Target Location | Status | Notes |
+|-------------------|----------------|--------|-------|
+| `reference/ui/` components | `components/ui/` | ✅ Complete | Full shadcn/ui implementation |
+| `reference/bet-opportunities/bet-calculations.ts` | `lib/betting/calculations.ts` | ✅ Complete | Moved and enhanced with TypeScript |
+| `reference/bet-opportunities/bet_recoveries.js` | `lib/betting/bet_recoveries.ts` | ✅ Complete | Converted to TypeScript with standalone version |
+| `reference/auth-supabase/` | `lib/supabase/` & `components/auth/` | ✅ Complete | Separated client/server code |
+| Core dashboard structure | `components/dashboard/` | ✅ Complete | Broken into focused modules |
 
-#### Phase 1: Foundation Setup
-1. **Create Ultimate Structure**: Set up the folder structure as defined above
-2. **Move Supabase Config**: Migrate auth setup from `reference/auth-supabase/` to `lib/supabase/`
-3. **TypeScript Types**: Create comprehensive types in `types/` folder
-4. **Environment Setup**: Configure `.env.local` with all required variables
+### 🚧 Remaining Migration Tasks
 
-#### Phase 2: Core Module Migration
-1. **Betting Logic**: Move `bet-calculations.ts` to `lib/betting/calculations.ts`
-2. **Database Integration**: Port database connection logic to `lib/supabase/`
-3. **API Layer**: Create Next.js API routes in `app/api/`
-4. **Middleware**: Set up authentication middleware
+| Reference Component | Target Location | Priority | Notes |
+|-------------------|----------------|----------|-------|
+| `reference/ui/landing-page.tsx` | `components/landing/` | High | Split into smaller feature components |
+| API route implementations | `app/api/` | High | Complete API endpoint implementations |
+| Error handling patterns | `lib/api/error-handling.ts` | Medium | Standardize error handling |
+| Testing migration | Update test files | Medium | Update tests for new structure |
 
-#### Phase 3: Component Refactoring
-1. **Landing Page**: Break down monolithic landing page into feature components
-2. **Dashboard Breakdown**: Split dashboard into Controls, Opportunities, and Logs components
-3. **Shared Components**: Extract reusable BetCard and other shared elements
-4. **Auth Components**: Create login/logout and auth wrapper components
+### Current Implementation Status
 
-#### Phase 4: Integration & Testing
-1. **Hook Creation**: Build custom hooks for data fetching and state management
-2. **Error Handling**: Implement error boundaries and validation
-3. **Testing Setup**: Add unit tests for all new components
-4. **Clean-up**: Remove `reference/` folder after successful migration
+#### ✅ Fully Implemented
+- **Component Architecture**: Modular dashboard with shared components
+- **UI System**: Complete shadcn/ui integration with theming
+- **Data Management**: Hooks for opportunities, user actions, mobile detection
+- **Betting Logic**: Advanced calculations and recovery processing
+- **Database Integration**: Supabase client/server separation
+- **Testing Infrastructure**: Comprehensive test suite
+
+#### 🔄 In Progress
+- **API Routes**: Basic structure exists, needs completion
+- **Landing Page**: Components exist but need final integration
+- **Authentication Flow**: Core implemented, needs refinement
+
+#### 📋 Planned
+- **Error Handling**: Standardized error patterns
+- **Performance Optimization**: Bundle analysis and optimization
+- **Documentation**: API documentation completion
+
+### Development Workflow
+
+#### Current Development Process
+1. **Feature Development**: Use existing component patterns and hooks
+2. **Testing**: Run comprehensive test suite before deployment  
+3. **Code Quality**: TypeScript strict mode and consistent patterns
+4. **Performance**: Monitor bundle size and component performance
+
+#### Next Development Priorities
+1. **Complete API Routes**: Finish remaining endpoint implementations
+2. **Landing Page Integration**: Complete landing page component assembly
+3. **Error Handling**: Implement standardized error handling patterns
+4. **Performance Optimization**: Bundle analysis and optimization
+5. **Documentation**: Complete API and component documentation
 
 ### Refactoring Guidelines
 
