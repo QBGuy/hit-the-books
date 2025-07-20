@@ -12,9 +12,10 @@ interface OpportunityListProps {
   stake: number
   betType: string
   onBetLogged?: () => void
+  onSwitchToLogs?: () => void
 }
 
-export function OpportunityList({ opportunities, stake, betType, onBetLogged }: OpportunityListProps) {
+export function OpportunityList({ opportunities, stake, betType, onBetLogged, onSwitchToLogs }: OpportunityListProps) {
   const [expandedOpportunity, setExpandedOpportunity] = useState<string | null>(null)
   const [loggingOpportunity, setLoggingOpportunity] = useState<Opportunity | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
@@ -133,6 +134,7 @@ export function OpportunityList({ opportunities, stake, betType, onBetLogged }: 
           calculatedStake1={loggingOpportunity.calculatedStake1}
           calculatedStake2={loggingOpportunity.calculatedStake2}
           onSuccess={handleModalSuccess}
+          onSwitchToLogs={onSwitchToLogs}
         />
       )}
     </>

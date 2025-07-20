@@ -19,6 +19,7 @@ export function DashboardLayout() {
   const [stake, setStake] = useState("100")
   const [betType, setBetType] = useState("bonus")
   const [selectedBookie, setSelectedBookie] = useState("all")
+  const [activeTab, setActiveTab] = useState("opportunities")
   
   // User action tracking
   const { 
@@ -110,13 +111,28 @@ export function DashboardLayout() {
     refreshBetLogs()
   }
 
+  // Generate dynamic title based on bet type and active tab
+  const getDashboardTitle = () => {
+    if (activeTab === "log") {
+      return "Bet Log"
+    }
+    
+    if (betType === "bonus") {
+      return "Bonus Opportunities"
+    } else if (betType === "turnover") {
+      return "Turnover Opportunities"
+    }
+    
+    return "Hit the Books Dashboard"
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <DashboardHeader />
       
       <div className="flex">
         {/* Controls Panel */}
-        <div className="w-80 bg-white border-r border-slate-200">
+        <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
           <ControlsPanel
             stake={stake}
             setStake={setStake}
@@ -125,7 +141,9 @@ export function DashboardLayout() {
             selectedBookie={selectedBookie}
             setSelectedBookie={setSelectedBookie}
             onRefresh={handleRefresh}
+            isRefreshing={isRefreshing}
           />
+          <UserSection />
         </div>
 
         {/* Main Content */}
@@ -134,14 +152,29 @@ export function DashboardLayout() {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Zap className="h-5 w-5 text-emerald-600" />
-                <span>Hit the Books Dashboard</span>
+                <span>{getDashboardTitle()}</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="opportunities" className="space-y-4">
+              <Tabs 
+                defaultValue="opportunities" 
+                className="space-y-4"
+                value={activeTab}
+                onValueChange={setActiveTab}
+              >
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
-                  <TabsTrigger value="log">Bet Logs ({betLogsTotal})</TabsTrigger>
+                  <TabsTrigger 
+                    value="opportunities"
+                    className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
+                  >
+                    Opportunities
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="log"
+                    className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
+                  >
+                    Bet Log ({betLogsTotal})
+                  </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="opportunities">
@@ -179,6 +212,7 @@ export function DashboardLayout() {
                           stake={parseFloat(stake) || 100}
                           betType={betType}
                           onBetLogged={handleBetLogged}
+                          onSwitchToLogs={() => setActiveTab("log")}
                         />
                       </ErrorBoundary>
                     )}

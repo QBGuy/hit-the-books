@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RefreshCw, DollarSign, Target } from "lucide-react"
 
 interface ControlsPanelProps {
@@ -15,7 +14,24 @@ interface ControlsPanelProps {
   selectedBookie: string
   setSelectedBookie: (bookie: string) => void
   onRefresh: () => void
+  isRefreshing?: boolean
 }
+
+// Bookie mapping from display names to API values
+const BOOKIE_MAPPING = {
+  "Betright": "betright",
+  "Betr": "betr_au", 
+  "Ladbrokes": "ladbrokes_au",
+  "Neds": "neds",
+  "Pointsbetau": "pointsbetau",
+  "Sportsbet": "sportsbet",
+  "Tab": "tab",
+  "Tabtouch": "tabtouch",
+  "Playup": "playup",
+  "Unibet": "unibet"
+}
+
+const BOOKIE_DISPLAY_NAMES = Object.keys(BOOKIE_MAPPING)
 
 export function ControlsPanel({
   stake,
@@ -24,7 +40,8 @@ export function ControlsPanel({
   setBetType,
   selectedBookie,
   setSelectedBookie,
-  onRefresh
+  onRefresh,
+  isRefreshing = false
 }: ControlsPanelProps) {
   return (
     <div className="flex-1 p-6 space-y-6">
@@ -80,30 +97,60 @@ export function ControlsPanel({
           </div>
         </div>
 
-        {/* Bookie */}
+        {/* Bookie Selection */}
         <div className="space-y-3 mb-6">
-          <Label className="text-sm font-medium text-slate-700">Bookie</Label>
-          <Select value={selectedBookie} onValueChange={setSelectedBookie}>
-            <SelectTrigger className="bg-slate-50 border-slate-200 h-12">
-              <SelectValue placeholder="Select bookie" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Bookies</SelectItem>
-              <SelectItem value="sportsbet">Sportsbet</SelectItem>
-              <SelectItem value="betfair">Betfair</SelectItem>
-              <SelectItem value="tab">TAB</SelectItem>
-              <SelectItem value="ladbrokes">Ladbrokes</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label className="text-sm font-medium text-slate-700">Bookies</Label>
+          <div className="space-y-2">
+            {/* All Bookies Button */}
+            <Button
+              variant={selectedBookie === "all" ? "default" : "outline"}
+              className={`w-full ${
+                selectedBookie === "all"
+                  ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+              }`}
+              onClick={() => setSelectedBookie("all")}
+            >
+              All Bookies
+            </Button>
+            
+            {/* Individual Bookie Buttons - 2 per row */}
+            <div className="grid grid-cols-2 gap-2">
+              {BOOKIE_DISPLAY_NAMES.map((displayName) => {
+                const apiValue = BOOKIE_MAPPING[displayName as keyof typeof BOOKIE_MAPPING]
+                const isSelected = selectedBookie === apiValue
+                
+                return (
+                  <Button
+                    key={apiValue}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`${
+                      isSelected
+                        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    }`}
+                    onClick={() => setSelectedBookie(apiValue)}
+                  >
+                    {displayName}
+                  </Button>
+                )
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Refresh Button */}
         <Button 
           onClick={onRefresh}
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-12"
+          disabled={isRefreshing}
+          className={`w-full h-12 ${
+            isRefreshing 
+              ? "bg-slate-300 text-slate-500 cursor-not-allowed" 
+              : "bg-emerald-600 hover:bg-emerald-700 text-white"
+          }`}
         >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
+          {isRefreshing ? "Refreshing..." : "Refresh"}
         </Button>
       </div>
     </div>

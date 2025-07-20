@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -32,6 +32,7 @@ interface BetLoggingModalProps {
   calculatedStake1?: number
   calculatedStake2?: number
   onSuccess: () => void
+  onSwitchToLogs?: () => void
 }
 
 export function BetLoggingModal({
@@ -41,7 +42,8 @@ export function BetLoggingModal({
   userStake,
   calculatedStake1,
   calculatedStake2,
-  onSuccess
+  onSuccess,
+  onSwitchToLogs
 }: BetLoggingModalProps) {
   const [isLogging, setIsLogging] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -52,6 +54,13 @@ export function BetLoggingModal({
   // Use calculated stakes if available, otherwise fallback to userStake
   const stake1Display = calculatedStake1 !== undefined ? calculatedStake1 : userStake
   const stake2Display = calculatedStake2 !== undefined ? calculatedStake2 : userStake
+
+  // Auto-log the bet when modal opens
+  useEffect(() => {
+    if (isOpen && !isLogging && !isSuccess && !error) {
+      handleLogBet()
+    }
+  }, [isOpen])
 
   const handleLogBet = async () => {
     setIsLogging(true)
@@ -85,11 +94,13 @@ export function BetLoggingModal({
       
       setIsSuccess(true)
       
-      // Close modal after showing success
+      // Close modal and switch to logs after showing success
       setTimeout(() => {
         onSuccess()
         onClose()
         setIsSuccess(false)
+        // Switch to bet logs tab
+        onSwitchToLogs?.()
       }, 1500)
       
     } catch (error) {
@@ -108,6 +119,7 @@ export function BetLoggingModal({
             <CheckCircle className="h-16 w-16 text-emerald-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-900 mb-2">Bet Logged Successfully!</h3>
             <p className="text-slate-600">Your bet has been saved to your betting log.</p>
+            <p className="text-sm text-slate-500 mt-2">Redirecting to Bet Log...</p>
           </div>
         </DialogContent>
       </Dialog>
@@ -120,7 +132,7 @@ export function BetLoggingModal({
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Badge variant="outline">{opportunity.sport}</Badge>
-            <span>Log Bet</span>
+            <span>Logging Bet...</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -129,6 +141,20 @@ export function BetLoggingModal({
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
               <p className="text-red-700 text-sm">{error}</p>
+              <Button 
+                onClick={handleLogBet}
+                className="mt-2 bg-emerald-600 hover:bg-emerald-700"
+              >
+                Retry
+              </Button>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {isLogging && !error && (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+              <p className="text-slate-600">Logging your bet...</p>
             </div>
           )}
 
@@ -165,28 +191,12 @@ export function BetLoggingModal({
                 </div>
 
                 <div className="text-center bg-emerald-50 rounded-lg p-3">
-                  <p className="text-xl font-bold text-emerald-600">{opportunity.calculatedProfitAmount || formatCurrency(opportunity.profit * userStake)}</p>
+                  <p className="text-xl font-bold text-emerald-600">{formatCurrency(opportunity.profit * userStake)}</p>
                   <p className="text-xs text-slate-600">Expected Profit</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-
-          <Separator />
-
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-3">
-            <Button variant="outline" onClick={onClose} disabled={isLogging}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleLogBet}
-              disabled={isLogging}
-              className="bg-emerald-600 hover:bg-emerald-700"
-            >
-              {isLogging ? "Logging..." : "Log This Bet"}
-            </Button>
-          </div>
         </div>
       </DialogContent>
     </Dialog>

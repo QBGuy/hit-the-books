@@ -96,7 +96,8 @@ export function BetCard({
       })()
 
   const calculatedProfitDisplay = profit || formatCurrency(calculations.profit)
-  const displayProfitPercentage = profitPercentage ? formatPercentage(profitPercentage) : null
+  // Remove decimal places from profit percentage
+  const displayProfitPercentage = profitPercentage ? `${Math.round(profitPercentage)}%` : null
 
   return (
     <Card
@@ -168,7 +169,7 @@ export function BetCard({
                   </p>
                   <p className="text-xs text-slate-600">Guaranteed Payout</p>
                 </div>
-                <div className="text-center bg-blue-50 rounded-lg p-3 flex items-center justify-center">
+                <div className="text-center bg-emerald-50 rounded-lg p-3 flex items-center justify-center">
                   {type === "log" ? (
                     <Button 
                       onClick={(e) => {
@@ -176,7 +177,7 @@ export function BetCard({
                         onDeleteBet?.()
                       }}
                       variant="destructive"
-                      className="w-full"
+                      className="w-full h-full text-lg font-bold"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete Bet
@@ -187,7 +188,7 @@ export function BetCard({
                         e.stopPropagation()
                         onLogBet?.()
                       }}
-                      className="w-full bg-emerald-600 hover:bg-emerald-700"
+                      className="w-full h-full bg-emerald-600 hover:bg-emerald-700 text-lg font-bold"
                     >
                       Log Bet
                     </Button>
