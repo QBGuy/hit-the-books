@@ -45,7 +45,7 @@ export function DashboardLayout() {
     betType,
     bookie: selectedBookie,
     stake: parseFloat(stake) || 100, // Convert to number
-    autoRefresh: true,
+    autoRefresh: false, // Disable auto-refresh, only refresh on manual button click
     refreshInterval: 60000
   })
 
@@ -97,8 +97,14 @@ export function DashboardLayout() {
   }, [betLogsError, logError, betType, selectedBookie])
 
   const handleRefresh = () => {
-    logOpportunitiesRefresh({ betType, selectedBookie, stake })
-    refresh()
+    if (activeTab === "log") {
+      // Refresh bet logs when on Bet Log tab
+      refreshBetLogs()
+    } else {
+      // Refresh opportunities when on Opportunities tab
+      logOpportunitiesRefresh({ betType, selectedBookie, stake })
+      refresh()
+    }
   }
 
   const handleBetLogged = () => {
@@ -106,9 +112,20 @@ export function DashboardLayout() {
     refreshBetLogs()
   }
 
-  const handleBetDeleted = () => {
+  const handleBetDeleted = async () => {
     // Refresh bet logs when a bet is deleted
-    refreshBetLogs()
+    await refreshBetLogs()
+  }
+
+  const handleDeleteBet = async (betId: string) => {
+    try {
+      await removeBetLog(betId)
+      // The removeBetLog function already handles optimistic updates
+    } catch (error) {
+      console.error('Error deleting bet:', error)
+      // Refresh to ensure UI is in sync
+      await refreshBetLogs()
+    }
   }
 
   // Generate dynamic title based on bet type and active tab
@@ -232,7 +249,7 @@ export function DashboardLayout() {
                       betLogs={betLogs} 
                       isLoading={betLogsLoading}
                       error={betLogsError}
-                      onDeleteBet={removeBetLog}
+                      onDeleteBet={handleDeleteBet}
                       onBetDeleted={handleBetDeleted}
                     />
                   </ErrorBoundary>

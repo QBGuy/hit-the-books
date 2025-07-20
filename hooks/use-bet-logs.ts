@@ -34,33 +34,25 @@ export interface BetLogFilters {
   offset?: number
 }
 
-// Fetch bet logs from API
-export async function fetchBetLogs(filters: BetLogFilters = {}): Promise<BetLogResponse> {
-  const params = new URLSearchParams()
+// Fetch all bet logs from API (no filters)
+export async function fetchBetLogs(): Promise<BetLogResponse> {
+  const url = `/api/bets`
+  console.log('🔍 Fetching all bet logs from:', url)
   
-  if (filters.betType && filters.betType !== 'all') {
-    params.append('betType', filters.betType)
-  }
+  const response = await fetch(url)
   
-  if (filters.bookie && filters.bookie !== 'all') {
-    params.append('bookie', filters.bookie)
-  }
-  
-  if (filters.limit) {
-    params.append('limit', filters.limit.toString())
-  }
-  
-  if (filters.offset) {
-    params.append('offset', filters.offset.toString())
-  }
-
-  const response = await fetch(`/api/bets?${params.toString()}`)
+  console.log('📡 API Response status:', response.status)
   
   if (!response.ok) {
+    const errorText = await response.text()
+    console.error('❌ API Error response:', errorText)
     throw new Error(`Failed to fetch bet logs: ${response.statusText}`)
   }
   
-  return response.json()
+  const data = await response.json()
+  console.log('✅ API Response data:', data)
+  
+  return data
 }
 
 // Update a bet log (e.g., profit_actual)
@@ -144,11 +136,13 @@ export function useBetLogs(initialFilters: BetLogFilters = {}) {
     setError(null)
     
     try {
+      console.log('🔍 Loading bet logs with filters:', filters)
       const response = await fetchBetLogs(filters)
+      console.log('✅ Bet logs response:', response)
       setBetLogs(response.betLogs)
       setTotal(response.total)
     } catch (err) {
-      console.error('Error loading bet logs:', err)
+      console.error('❌ Error loading bet logs:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch bet logs')
     } finally {
       setIsLoading(false)

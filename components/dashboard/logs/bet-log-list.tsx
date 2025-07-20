@@ -81,7 +81,7 @@ export function BetLogList({ betLogs, isLoading, error, onDeleteBet, onBetDelete
             odds2={log.odds_2}
             stake={log.stake_1}
             date={new Date(log.timestamp).toLocaleDateString()}
-            status={log.profit_actual !== null ? "Completed" : "Pending"}
+            status={undefined} // Remove status tags
             profit={log.profit_actual !== null ? formatCurrency(log.profit_actual) : formatCurrency(log.profit)}
             type="log"
             betType={log.bet_type}

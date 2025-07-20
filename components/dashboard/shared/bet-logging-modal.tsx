@@ -152,10 +152,29 @@ export function BetLoggingModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Error Display */}
+          {/* Success State */}
+          {isSuccess && (
+            <div className="text-center py-8">
+              <div className="text-emerald-600 mb-4">
+                <svg className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Your bet has been saved</h3>
+              <p className="text-slate-600">The bet has been logged to your bet history</p>
+            </div>
+          )}
+
+          {/* Error State */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-red-700 text-sm">{error}</p>
+            <div className="text-center py-8">
+              <div className="text-red-600 mb-4">
+                <svg className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Failed to log bet</h3>
+              <p className="text-slate-600 mb-4">{error}</p>
               <Button 
                 onClick={handleLogBet}
                 className="mt-2 bg-emerald-600 hover:bg-emerald-700"
@@ -166,13 +185,14 @@ export function BetLoggingModal({
           )}
 
           {/* Loading State */}
-          {isLogging && !error && (
+          {isLogging && !error && !isSuccess && (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
               <p className="text-slate-600">Logging your bet...</p>
             </div>
           )}
 
+          {/* Success State */}
           {/* Bet Summary */}
           <Card>
             <CardContent className="p-4">
