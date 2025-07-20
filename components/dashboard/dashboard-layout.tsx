@@ -150,7 +150,7 @@ export function DashboardLayout() {
       
       <div className="flex flex-1 overflow-hidden">
         {/* Fixed Controls Panel */}
-        <div className="w-80 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 py-[24px]">
+        <div className="w-80 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 py-[16px]">
           <ControlsPanel
             stake={stake}
             setStake={setStake}
