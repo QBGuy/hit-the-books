@@ -65,6 +65,7 @@ export async function GET(request: Request) {
 
 // POST /api/bets - Log a new bet
 export async function POST(request: Request) {
+  console.log('📥 POST /api/bets - Received bet logging request')
   try {
     const supabase = await createClient()
     
@@ -128,18 +129,21 @@ export async function POST(request: Request) {
     }
 
     // Insert the bet log
+    console.log('💾 Inserting bet log into database:', insertData)
     const { data, error } = await supabase
       .from('bet_log')
       .insert([insertData])
       .select()
 
     if (error) {
-      console.error('Error inserting bet log:', error)
+      console.error('❌ Error inserting bet log:', error)
       return NextResponse.json(
         { message: 'Failed to log bet', error: error.message },
         { status: 500 }
       )
     }
+
+    console.log('✅ Bet log inserted successfully:', data[0])
 
     // Log user action
     try {

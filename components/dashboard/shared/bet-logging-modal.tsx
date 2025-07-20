@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -48,6 +48,7 @@ export function BetLoggingModal({
   const [isLogging, setIsLogging] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const hasLoggedRef = useRef(false)
 
   const { logBetLogged } = useUserActions()
 
@@ -56,14 +57,15 @@ export function BetLoggingModal({
   const stake1Display = calculatedStake1 !== undefined ? calculatedStake1 : userStake
   const stake2Display = calculatedStake2 !== undefined ? calculatedStake2 : userStake
 
-  // Auto-log the bet when modal opens
-  useEffect(() => {
-    if (isOpen && !isLogging && !isSuccess && !error) {
-      handleLogBet()
+  const handleLogBet = useCallback(async () => {
+    // Prevent multiple calls
+    if (hasLoggedRef.current) {
+      console.log('🚫 Bet logging prevented - already logged')
+      return
     }
-  }, [isOpen])
-
-  const handleLogBet = async () => {
+    
+    console.log('✅ Starting bet logging process')
+    hasLoggedRef.current = true
     setIsLogging(true)
     setError(null)
     
@@ -100,12 +102,13 @@ export function BetLoggingModal({
       }
 
       // Log the bet to Supabase
+      console.log('📡 Calling logBet API with data:', betData)
       const result = await logBet(betData)
       
       // Log user action
       logBetLogged(betData)
       
-      console.log("Bet logged successfully:", result)
+      console.log("✅ Bet logged successfully:", result)
       
       setIsSuccess(true)
       
@@ -124,7 +127,21 @@ export function BetLoggingModal({
     } finally {
       setIsLogging(false)
     }
-  }
+  }, [opportunity, userStake, stake2Display, logBetLogged, onSuccess, onClose, onSwitchToLogs])
+
+  // Auto-log the bet when modal opens
+  useEffect(() => {
+    if (isOpen && !isLogging && !isSuccess && !error && !hasLoggedRef.current) {
+      handleLogBet()
+    }
+  }, [isOpen, isLogging, isSuccess, error, handleLogBet])
+
+  // Reset the logged flag when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      hasLoggedRef.current = false
+    }
+  }, [isOpen])
 
   if (isSuccess) {
     return (
