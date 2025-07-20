@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Zap } from "lucide-react"
-import { DashboardHeader, UserSection } from "./shared/dashboard-header"
+import { DashboardHeader } from "./shared/dashboard-header"
 import { ControlsPanel } from "./controls-panel"
 import { OpportunityList } from "./opportunities/opportunity-list"
 import { BetLogList } from "./logs/bet-log-list"
@@ -144,12 +144,13 @@ export function DashboardLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="h-screen flex flex-col bg-slate-50">
+      {/* Fixed Header */}
       <DashboardHeader />
       
-      <div className="flex">
-        {/* Controls Panel */}
-        <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
+      <div className="flex flex-1 overflow-hidden">
+        {/* Fixed Controls Panel */}
+        <div className="w-80 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 py-[24px]">
           <ControlsPanel
             stake={stake}
             setStake={setStake}
@@ -160,103 +161,104 @@ export function DashboardLayout() {
             onRefresh={handleRefresh}
             isRefreshing={isRefreshing}
           />
-          <UserSection />
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 p-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Zap className="h-5 w-5 text-emerald-600" />
-                <span>{getDashboardTitle()}</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs 
-                defaultValue="opportunities" 
-                className="space-y-4"
-                value={activeTab}
-                onValueChange={setActiveTab}
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger 
-                    value="opportunities"
-                    className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
-                  >
-                    Opportunities
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="log"
-                    className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
-                  >
-                    Bet Log ({betLogsTotal})
-                  </TabsTrigger>
-                </TabsList>
+        {/* Scrollable Main Content */}
+        <div className="flex-1 overflow-auto">
+          <div className="p-4">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center space-x-2">
+                  <Zap className="h-5 w-5 text-emerald-600" />
+                  <span>{getDashboardTitle()}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <Tabs 
+                  defaultValue="opportunities" 
+                  className="space-y-3"
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger 
+                      value="opportunities"
+                      className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
+                    >
+                      Opportunities
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="log"
+                      className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
+                    >
+                      Bet Log ({betLogsTotal})
+                    </TabsTrigger>
+                  </TabsList>
 
-                <TabsContent value="opportunities">
-                  <div className="space-y-4">
-                    <DataFreshnessIndicator
-                      lastUpdated={lastUpdated}
-                      ageInSeconds={ageInSeconds}
-                      isStale={isStale}
-                      isFresh={isFresh}
-                      needsRefresh={needsRefresh}
-                      isRefreshing={isRefreshing}
-                    />
-                    
-                    {isLoading ? (
-                      <div className="space-y-4">
-                        <div className="text-center py-8">
-                          <LoadingSpinner size="lg" text="Loading opportunities..." />
-                        </div>
-                        <CardLoadingSkeleton />
-                        <CardLoadingSkeleton />
-                        <CardLoadingSkeleton />
-                      </div>
-                    ) : (
-                      <ErrorBoundary
-                        fallback={
-                          <ErrorFallback 
-                            title="Opportunities Display Error"
-                            message="Unable to display betting opportunities"
-                            resetError={handleRefresh}
-                          />
-                        }
-                      >
-                        <OpportunityList
-                          opportunities={opportunities}
-                          stake={parseFloat(stake) || 100}
-                          betType={betType}
-                          onBetLogged={handleBetLogged}
-                          onSwitchToLogs={() => setActiveTab("log")}
-                        />
-                      </ErrorBoundary>
-                    )}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="log">
-                  <ErrorBoundary
-                    fallback={
-                      <ErrorFallback 
-                        title="Bet Logs Error"
-                        message="Unable to load your betting logs"
+                  <TabsContent value="opportunities">
+                    <div className="space-y-3">
+                      <DataFreshnessIndicator
+                        lastUpdated={lastUpdated}
+                        ageInSeconds={ageInSeconds}
+                        isStale={isStale}
+                        isFresh={isFresh}
+                        needsRefresh={needsRefresh}
+                        isRefreshing={isRefreshing}
                       />
-                    }
-                  >
-                    <BetLogList 
-                      betLogs={betLogs} 
-                      isLoading={betLogsLoading}
-                      error={betLogsError}
-                      onDeleteBet={handleDeleteBet}
-                      onBetDeleted={handleBetDeleted}
-                    />
-                  </ErrorBoundary>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+                      
+                      {isLoading ? (
+                        <div className="space-y-3">
+                          <div className="text-center py-6">
+                            <LoadingSpinner size="lg" text="Loading opportunities..." />
+                          </div>
+                          <CardLoadingSkeleton />
+                          <CardLoadingSkeleton />
+                          <CardLoadingSkeleton />
+                        </div>
+                      ) : (
+                        <ErrorBoundary
+                          fallback={
+                            <ErrorFallback 
+                              title="Opportunities Display Error"
+                              message="Unable to display betting opportunities"
+                              resetError={handleRefresh}
+                            />
+                          }
+                        >
+                          <OpportunityList
+                            opportunities={opportunities}
+                            stake={parseFloat(stake) || 100}
+                            betType={betType}
+                            onBetLogged={handleBetLogged}
+                            onSwitchToLogs={() => setActiveTab("log")}
+                          />
+                        </ErrorBoundary>
+                      )}
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="log">
+                    <ErrorBoundary
+                      fallback={
+                        <ErrorFallback 
+                          title="Bet Logs Error"
+                          message="Unable to load your betting logs"
+                        />
+                      }
+                    >
+                      <BetLogList 
+                        betLogs={betLogs} 
+                        isLoading={betLogsLoading}
+                        error={betLogsError}
+                        onDeleteBet={handleDeleteBet}
+                        onBetDeleted={handleBetDeleted}
+                      />
+                    </ErrorBoundary>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

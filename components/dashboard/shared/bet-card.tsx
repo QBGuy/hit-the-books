@@ -106,12 +106,12 @@ export function BetCard({
       } ${isExpanded ? "border-emerald-500" : ""}`}
       onClick={onClick}
     >
-      <CardContent className="p-6">
-        <div className="space-y-4">
+      <CardContent className="p-4">
+        <div className="space-y-3">
           {/* Header Row with Sport and Teams */}
           <div className="grid grid-cols-5 gap-6 items-center">
             <div className="flex flex-col items-center space-y-1">
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-sm">
                 {sport}
               </Badge>
               {date && <p className="text-xs text-slate-500">{date}</p>}
@@ -157,43 +157,42 @@ export function BetCard({
             <>
               <Separator />
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center bg-slate-50 rounded-lg p-3">
-                  <p className="text-lg font-bold text-slate-900">
+                <div className="text-center bg-slate-50 rounded-lg p-1">
+                  <p className="text-base font-bold text-slate-900">
                     {formatCurrency(calculations.outlay)}
                   </p>
                   <p className="text-xs text-slate-600">Outlay</p>
                 </div>
-                <div className="text-center bg-emerald-50 rounded-lg p-3">
-                  <p className="text-lg font-bold text-emerald-600">
+                <div className="text-center bg-emerald-50 rounded-lg p-1">
+                  <p className="text-base font-bold text-emerald-600">
                     {formatCurrency(calculations.totalPayout)}
                   </p>
                   <p className="text-xs text-slate-600">Guaranteed Payout</p>
                 </div>
-                <div className="text-center bg-emerald-50 rounded-lg p-3 flex items-center justify-center">
-                  {type === "log" ? (
-                    <Button 
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onDeleteBet?.()
-                      }}
-                      variant="destructive"
-                      className="w-full h-full text-lg font-bold"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                {type === "log" ? (
+                  <div 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onDeleteBet?.()
+                    }}
+                    className="text-center bg-red-600 hover:bg-red-700 rounded-lg p-1 cursor-pointer flex items-center justify-center"
+                  >
+                    <span className="text-base font-bold text-white flex items-center">
+                      <Trash2 className="h-3 w-3 mr-1.5" />
                       Delete Bet
-                    </Button>
-                  ) : (
-                    <Button 
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onLogBet?.()
-                      }}
-                      className="w-full h-full bg-emerald-600 hover:bg-emerald-700 text-lg font-bold"
-                    >
-                      Log Bet
-                    </Button>
-                  )}
-                </div>
+                    </span>
+                  </div>
+                ) : (
+                  <div 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onLogBet?.()
+                    }}
+                    className="text-center bg-emerald-600 hover:bg-emerald-700 rounded-lg p-1 cursor-pointer flex items-center justify-center"
+                  >
+                    <span className="text-base font-bold text-white">Log Bet</span>
+                  </div>
+                )}
               </div>
             </>
           )}

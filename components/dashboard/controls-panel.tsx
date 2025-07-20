@@ -23,7 +23,7 @@ const BOOKIE_MAPPING = {
   "Betr": "betr_au", 
   "Ladbrokes": "ladbrokes_au",
   "Neds": "neds",
-  "Pointsbetau": "pointsbetau",
+  "Pointsbet": "pointsbetau",
   "Sportsbet": "sportsbet",
   "Tab": "tab",
   "Tabtouch": "tabtouch",
@@ -46,7 +46,7 @@ export function ControlsPanel({
   return (
     <div className="flex-1 p-6 space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
+        <h3 className="text-2xl font-semibold text-slate-900 mb-4 flex items-center">
           <Target className="h-5 w-5 text-emerald-600 mr-2" />
           Controls
         </h3>
@@ -140,18 +140,21 @@ export function ControlsPanel({
         </div>
 
         {/* Refresh Button */}
-        <Button 
-          onClick={onRefresh}
-          disabled={isRefreshing}
-          className={`w-full h-12 ${
-            isRefreshing 
-              ? "bg-slate-300 text-slate-500 cursor-not-allowed" 
-              : "bg-emerald-600 hover:bg-emerald-700 text-white"
-          }`}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
-          {isRefreshing ? "Refreshing..." : "Refresh"}
-        </Button>
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-slate-700">Data Refresh</Label>
+          <Button 
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            className={`w-full ${
+              isRefreshing 
+                ? "bg-slate-300 text-slate-500 cursor-not-allowed" 
+                : "bg-emerald-600 hover:bg-emerald-700 text-white"
+            }`}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
+            {isRefreshing ? "Refreshing..." : "Refresh"}
+          </Button>
+        </div>
       </div>
     </div>
   )
