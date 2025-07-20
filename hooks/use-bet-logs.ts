@@ -63,6 +63,27 @@ export async function fetchBetLogs(filters: BetLogFilters = {}): Promise<BetLogR
   return response.json()
 }
 
+// Update a bet log (e.g., profit_actual)
+export async function updateBetLog(
+  betId: string,
+  updateData: Partial<BetLog>
+): Promise<{ message: string; bet: BetLog }> {
+  const response = await fetch(`/api/bets/${betId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(updateData),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json()
+    throw new Error(errorData.message || 'Failed to update bet')
+  }
+
+  return response.json()
+}
+
 // Log a new bet
 export async function logBet(betData: {
   sport: string
@@ -164,6 +185,22 @@ export function useBetLogs(initialFilters: BetLogFilters = {}) {
     }
   }, [])
 
+  const updateBetLogInList = useCallback(async (betId: string, updateData: Partial<BetLog>) => {
+    try {
+      const result = await updateBetLog(betId, updateData)
+      
+      // Optimistically update the bet in the list
+      setBetLogs(prev => prev.map(bet => 
+        bet.id === betId ? { ...bet, ...result.bet } : bet
+      ))
+      
+      return result
+    } catch (err) {
+      console.error('Error updating bet:', err)
+      throw err
+    }
+  }, [])
+
   const updateFilters = useCallback((newFilters: Partial<BetLogFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }))
   }, [])
@@ -178,10 +215,9 @@ export function useBetLogs(initialFilters: BetLogFilters = {}) {
     isLoading,
     error,
     total,
-    filters,
-    loadBetLogs,
     addBetLog,
     removeBetLog,
+    updateBetLogInList,
     updateFilters,
     refresh: loadBetLogs
   }

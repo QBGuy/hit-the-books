@@ -69,7 +69,7 @@ export function BetCard({
     ? {
         stake1: calculatedStake1,
         stake2: calculatedStake2,
-        outlay: calculatedOutlay || (calculatedStake1 + calculatedStake2),
+        outlay: calculatedOutlay || (calculatedStake1 * (betType === "bonus" ? 0 : 1) + calculatedStake2),
         totalPayout: calculatedTotalPayout || Math.min(stake * odds1, stake * odds2),
         profit: calculatedProfit || 0
       }
@@ -125,7 +125,7 @@ export function BetCard({
                 {betType === "bonus" ? (
                   <span className="text-emerald-600">{formatCurrency(stake)} bonus</span>
                 ) : (
-                  <span className="text-slate-900">{formatCurrency(calculations.stake1)}</span>
+                  <span className="text-slate-900">{formatCurrency(stake)}</span>
                 )}
               </p>
             </div>

@@ -34,8 +34,8 @@ export function calculateBetOutcomes(input: BetCalculationInput): BetCalculation
     bookie2
   } = input
 
-  // Calculate stakes - for bonus bets, stake1 outlay is 0
-  const stake1 = isBonus ? 0 : stake
+  // Calculate stakes - stake1 is always the original stake (never 0)
+  const stake1 = stake
   const stake2 = stake * stake2Ratio
 
   // Apply Betfair scalar if applicable
@@ -52,8 +52,8 @@ export function calculateBetOutcomes(input: BetCalculationInput): BetCalculation
   const payout1 = payoutStake1 * (isBonus ? effectiveOdds1 - 1 : effectiveOdds1)  // For bonus, only get the profit portion
   const payout2 = stake2 * effectiveOdds2
 
-  // Calculate totals
-  const outlay = stake1 + stake2  // For bonus bets, this will only be stake2
+  // Calculate totals - outlay is (stake_1 * [bool: if bonus_type="bonus" then 0 else 1] + stake_2)
+  const outlay = (stake1 * (isBonus ? 0 : 1)) + stake2
   const totalPayout = Math.min(payout1, payout2)
   const profit = totalPayout - outlay
   
@@ -94,6 +94,42 @@ export function calculateDisplayProfit(
     profit: result.profit,
     profitPercentage: result.profitPercentage
   }
+}
+
+// Helper function to calculate profit_actual for bet logs
+export function calculateProfitActual(
+  stake1: number,
+  stake2: number,
+  odds1: number,
+  odds2: number,
+  betType: "bonus" | "turnover",
+  betfairScalar: number = 1,
+  bookie1?: string,
+  bookie2?: string
+): number {
+  const isBonus = betType === "bonus"
+  
+  // Apply Betfair scalar if applicable
+  let effectiveOdds1 = bookie1 === 'betfair_ex_au' ? 
+    (odds1 - 1) * betfairScalar + 1 : 
+    odds1
+
+  let effectiveOdds2 = bookie2 === 'betfair_ex_au' ? 
+    (odds2 - 1) * betfairScalar + 1 : 
+    odds2
+
+  // Calculate payouts
+  const payout1 = stake1 * (isBonus ? effectiveOdds1 - 1 : effectiveOdds1)  // For bonus, only get the profit portion
+  const payout2 = stake2 * effectiveOdds2
+
+  // Calculate outlay using the new formula
+  const outlay = (stake1 * (isBonus ? 0 : 1)) + stake2
+  
+  // Calculate actual profit
+  const totalPayout = Math.min(payout1, payout2)
+  const profitActual = totalPayout - outlay
+
+  return profitActual
 }
 
 // Helper function to format currency

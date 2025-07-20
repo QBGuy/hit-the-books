@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { CheckCircle } from "lucide-react"
-import { formatCurrency } from "@/lib/betting/calculations"
+import { formatCurrency, calculateProfitActual } from "@/lib/betting/calculations"
 import { logBet } from "@/hooks/use-bet-logs"
 import { useUserActions } from "@/hooks/use-user-actions"
 
@@ -52,6 +52,7 @@ export function BetLoggingModal({
   const { logBetLogged } = useUserActions()
 
   // Use calculated stakes if available, otherwise fallback to userStake
+  // For bonus bets, stake_1 should still be the actual stake amount (not 0)
   const stake1Display = calculatedStake1 !== undefined ? calculatedStake1 : userStake
   const stake2Display = calculatedStake2 !== undefined ? calculatedStake2 : userStake
 
@@ -67,18 +68,32 @@ export function BetLoggingModal({
     setError(null)
     
     try {
+      // Calculate profit_actual using the new logic
+      const profitActual = calculateProfitActual(
+        userStake, // stake1
+        stake2Display, // stake2
+        opportunity.odds1,
+        opportunity.odds2,
+        opportunity.betType,
+        opportunity.betfairScalar,
+        opportunity.bookie1,
+        opportunity.bookie2
+      )
+
       // Prepare bet data for API
+      // For bonus bets, stake_1 should be the actual stake amount, not 0
       const betData = {
         sport: opportunity.sport,
         bookie_1: opportunity.bookie1,
         odds_1: opportunity.odds1,
         team_1: opportunity.team1,
-        stake_1: stake1Display,
+        stake_1: userStake, // Always use the actual stake amount
         bookie_2: opportunity.bookie2,
         odds_2: opportunity.odds2,
         team_2: opportunity.team2,
         stake_2: stake2Display,
         profit: opportunity.profit,
+        profit_actual: profitActual,
         betfair_scalar: opportunity.betfairScalar,
         bookie: opportunity.bookie,
         bet_type: opportunity.betType
